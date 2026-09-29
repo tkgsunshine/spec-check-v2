@@ -595,7 +595,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="max-w-3xl mx-auto px-4 pt-6 pb-32 md:py-10">
+    <main className="max-w-3xl mx-auto px-4 pt-4 sm:pt-6 pb-8 sm:pb-12 md:py-10">
       {/* 🚀 Dedicated Full-Screen High-Tech AI Analysis Loading Screen */}
       {loading && (
         <AnalysisLoadingScreen
@@ -720,7 +720,7 @@ export default function HomePage() {
       </div>
 
       {/* Step Form Container */}
-      <div className="glass-surface glass-surface-glow rounded-3xl p-6 md:p-8 mb-8">
+      <div className="glass-surface glass-surface-glow rounded-3xl p-5 sm:p-6 md:p-8 mb-4 sm:mb-6">
         {/* Step 1: 基本情報 */}
         {currentStep === 1 && (
           <div className="space-y-6">
@@ -1580,7 +1580,7 @@ export default function HomePage() {
         )}
 
         {/* Step Navigation Controls */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-800 pt-6 mt-6 pb-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-slate-800 pt-4 mt-5">
           {currentStep > 1 ? (
             <button
               type="button"

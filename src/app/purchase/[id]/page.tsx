@@ -174,7 +174,7 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
           </h1>
 
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            公的統計データモデルに基づく詳細分析により、あなたの本当の強み・改善可能な弱点・同世代異性1,000人中におけるモテ度を精密集計した完全版レポートをお届けします。
+            政府公式統計データと精密分析モデルにより、あなたの隠れた強み・具体的な改善アクション・同世代におけるリアルな市場ポジションを網羅した完全解析レポートをお届けします。
           </p>
         </div>
 
@@ -242,7 +242,7 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* BENEFIT 01 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-400">
                 <Users className="w-5 h-5" />
@@ -255,14 +255,10 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <p className="text-xs text-slate-300 leading-relaxed">
               ペアーズ・with・東カレ・タップル・結婚相談所など、主要プラットフォームごとの適合度と有利度を算出。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>主戦場ランキングTOP3 ＆ 受容率</span>
-              <span className="text-purple-400 font-mono font-black">完全アンロック 🔓</span>
-            </div>
           </div>
 
           {/* BENEFIT 02 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-pink-500/10 border border-pink-500/30 text-pink-400">
                 <Heart className="w-5 h-5" />
@@ -275,14 +271,10 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <p className="text-xs text-slate-300 leading-relaxed">
               あなたのスペックに強く惹かれる異性の「年齢層」「職業傾向」「外見タイプ」「相性最良の性格」を徹底分析。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>相性最良の異性プロファイル</span>
-              <span className="text-pink-400 font-mono font-black">完全アンロック 🔓</span>
-            </div>
           </div>
 
           {/* BENEFIT 03 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
                 <AlertTriangle className="w-5 h-5" />
@@ -295,34 +287,26 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <p className="text-xs text-slate-300 leading-relaxed">
               時間を無駄にしないための防衛策。あなたの性格・ステータスと衝突しやすい異性の特徴を事前に把握。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>地雷異性ワースト3 ＆ 回避策</span>
-              <span className="text-rose-400 font-mono font-black">完全アンロック 🔓</span>
-            </div>
           </div>
 
           {/* BENEFIT 04 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
                 <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">BENEFIT 04</span>
-                <h3 className="text-base font-black text-white">6項目別 改善ロードマップ (+xx pt具体策)</h3>
+                <h3 className="text-base font-black text-white">6カテゴリ別 改善ロードマップ ＆ スコア向上具体策</h3>
               </div>
             </div>
             <p className="text-xs text-slate-300 leading-relaxed">
               何を改善すれば何ポイント向上するか、費用対効果の高い具体的アクションを6カテゴリすべてで明示。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>改善具体策 ＆ 加点シミュレーション</span>
-              <span className="text-emerald-400 font-mono font-black">完全アンロック 🔓</span>
-            </div>
           </div>
 
           {/* BENEFIT 05 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400">
                 <FileText className="w-5 h-5" />
@@ -335,14 +319,10 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <p className="text-xs text-slate-300 leading-relaxed">
               あなたの強みと誠実さを最大化する「マッチングアプリ用」＆「真剣婚活・相談所用」の2パターンを生成。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>アプリ用＆婚活用 2パターン自己PR</span>
-              <span className="text-amber-400 font-mono font-black">ワンクリックコピー 📋</span>
-            </div>
           </div>
 
           {/* BENEFIT 06 */}
-          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden">
+          <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 space-y-3 relative overflow-hidden flex flex-col justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
                 <Sparkles className="w-5 h-5" />
@@ -355,10 +335,6 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <p className="text-xs text-slate-300 leading-relaxed">
               全6軸の数値・上位%の完全アンロックに加え、統計的ポジション・強み相乗効果・MBTI特性・地域市場環境・中長期戦略の詳細総評（約2,000文字）をフルアンロック。
             </p>
-            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between text-xs font-bold text-slate-300">
-              <span>全6軸数値 ＆ 詳細総評</span>
-              <span className="text-indigo-400 font-mono font-black">完全アンロック 🔓</span>
-            </div>
           </div>
         </div>
       </section>
@@ -366,7 +342,7 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
       {/* ③ 中段CTAバナー */}
       <section className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/80 via-slate-900/90 to-indigo-950/80 border border-purple-500/40 text-center space-y-4 shadow-xl">
         <h3 className="text-lg sm:text-xl font-black text-white">
-          あなたの本当の市場価値を、今すぐ手に入れよう
+          限定データを解放して、あなたの可能性を最大化しよう
         </h3>
         <p className="text-xs text-slate-300">
           追加費用なしのワンコイン ¥500。決済完了後、即時（0秒）で結果画面のすべての制限が解除されます。
