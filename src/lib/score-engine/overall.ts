@@ -5,7 +5,7 @@ import { calculateNetWorthScore } from './assets';
 import { calculateAcademicScore } from './academic';
 import { calculateCareerScore } from './career';
 import { calculateSnsScore } from './sns';
-import { calculateFaceScore, analyzeFaceWithGemini } from './face';
+import { calculateFaceScore, analyzeFaceWithClaude } from './face';
 import { calculateLanguageScore } from './language';
 import { calculateTravelScore } from './travel';
 import { calculateLoveScore } from './love';
@@ -220,12 +220,12 @@ export function runDiagnosisV3(input: DiagnosisInputV3): OverallDiagnosisResultV
 }
 
 /**
- * 非同期版診断実行関数 (Gemini AI による顔写真解析を組み込み)
+ * 非同期版診断実行関数 (Claude AI による顔写真解析を組み込み)
  */
 export async function runDiagnosisV3Async(input: DiagnosisInputV3): Promise<OverallDiagnosisResultV3> {
-  let geminiAnalysis = null;
+  let faceAnalysis = null;
   if (input.faceImageUrl && input.faceImageUrl.trim() !== '') {
-    geminiAnalysis = await analyzeFaceWithGemini({
+    faceAnalysis = await analyzeFaceWithClaude({
       faceImageUrl: input.faceImageUrl,
       age: input.age,
       gender: input.gender,
@@ -317,11 +317,11 @@ export async function runDiagnosisV3Async(input: DiagnosisInputV3): Promise<Over
 
   const totalGlobalScore = Math.round((languageResult.score * 0.5 + travelResult.score * 0.5) * 10) / 10;
 
-  // Gemini 解析結果を calculateFaceScore に引き渡し
+  // AI 解析結果を calculateFaceScore に引き渡し
   const faceResult = calculateFaceScore({
     faceRating: input.faceRating,
     faceImageUrl: input.faceImageUrl,
-    geminiAnalysis,
+    faceAnalysis,
   });
 
   const categoryAvailable = [
