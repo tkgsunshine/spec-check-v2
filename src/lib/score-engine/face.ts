@@ -35,7 +35,12 @@ export async function analyzeFaceWithClaude(params: {
   gender?: Gender | string | null;
 }): Promise<FaceAnalysisResult | null> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey || !params.faceImageUrl || !params.faceImageUrl.trim()) {
+  if (!apiKey) {
+    console.warn('Face analysis skipped: ANTHROPIC_API_KEY is not set');
+    return null;
+  }
+  if (!params.faceImageUrl || !params.faceImageUrl.trim()) {
+    console.warn('Face analysis skipped: no face image');
     return null;
   }
 
@@ -97,7 +102,12 @@ export async function analyzeFaceWithClaude(params: {
       ],
     });
 
+    console.log(
+      `Face analysis: model=${response.model} stop_reason=${response.stop_reason} ` +
+      `input_tokens=${response.usage.input_tokens} output_tokens=${response.usage.output_tokens}`
+    );
     if (response.stop_reason === 'refusal' || !response.parsed_output) {
+      console.warn('Face analysis returned no usable result (refusal or unparsable output)');
       return null;
     }
     return response.parsed_output;
