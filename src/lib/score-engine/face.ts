@@ -1,27 +1,46 @@
 import { MetricScoreResult, FaceScoreResult, FaceRating, Gender } from '@/types/spec-check';
-import { GoogleGenAI, Type } from '@google/genai';
+import Anthropic from '@anthropic-ai/sdk';
+import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
+import { z } from 'zod';
 
-export interface GeminiFaceAnalysisResult {
+export interface FaceAnalysisResult {
   isHuman: boolean;
   scoreBonus: number;
   comment: string;
 }
 
+const FaceAnalysisSchema = z.object({
+  isHuman: z.boolean(),
+  scoreBonus: z.number().int(),
+  comment: z.string(),
+});
+
+// 使用モデルは環境変数 ANTHROPIC_MODEL で切り替え可能（未設定時は claude-opus-5-5）
+const MODEL = process.env.ANTHROPIC_MODEL || 'claude-opus-5-5';
+
+type ImageMediaType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
+
+function toImageMediaType(value: string): ImageMediaType {
+  const v = value.split(';')[0].trim().toLowerCase();
+  if (v === 'image/png' || v === 'image/gif' || v === 'image/webp') return v;
+  return 'image/jpeg';
+}
+
 /**
- * Gemini API を活用した年代・性別対応の顔面・雰囲気解析
+ * Claude API を活用した年代・性別対応の顔面・雰囲気解析
  */
-export async function analyzeFaceWithGemini(params: {
+export async function analyzeFaceWithClaude(params: {
   faceImageUrl: string;
   age?: number | null;
   gender?: Gender | string | null;
-}): Promise<GeminiFaceAnalysisResult | null> {
-  const apiKey = process.env.GEMINI_API_KEY;
+}): Promise<FaceAnalysisResult | null> {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey || !params.faceImageUrl || !params.faceImageUrl.trim()) {
     return null;
   }
 
   try {
-    const ai = new GoogleGenAI({ apiKey });
+    const client = new Anthropic({ apiKey });
 
     const ageLabel = params.age ? `${params.age}歳` : '年代未指定';
     let genderLabel = '人物';
@@ -30,7 +49,7 @@ export async function analyzeFaceWithGemini(params: {
 
     const prompt = `あなたはプロのルックス・雰囲気診断AIです。
 添付された画像は【${ageLabel}・日本人${genderLabel}】の人物の顔写真です。
-日本の${ageLabel}・日本人${genderLabel}における相対的な雰囲気、清潔感、好印象度、ルックスポイントを分析し、以下のJSON形式でのみ回答してください。
+日本の${ageLabel}・日本人${genderLabel}における相対的な雰囲気、清潔感、好印象度、ルックスポイントを分析し、指定のJSON形式でのみ回答してください。
 
 【評価規則】
 1. isHuman: 人物の顔写真が適切に写っているか（動物、景色、イラスト、顔が見えない場合は false）
@@ -42,64 +61,48 @@ export async function analyzeFaceWithGemini(params: {
    例：「30代日本人男性として清潔感のある引き締まった好印象な表情です」
 `;
 
-    let mimeType = 'image/jpeg';
+    let mediaType: ImageMediaType = 'image/jpeg';
     let base64Data = params.faceImageUrl;
 
     if (params.faceImageUrl.startsWith('data:')) {
       const parts = params.faceImageUrl.split(';base64,');
-      mimeType = parts[0].replace('data:', '');
+      mediaType = toImageMediaType(parts[0].replace('data:', ''));
       base64Data = parts[1];
     } else if (params.faceImageUrl.startsWith('http')) {
       const res = await fetch(params.faceImageUrl);
       const arrayBuffer = await res.arrayBuffer();
       base64Data = Buffer.from(arrayBuffer).toString('base64');
       const contentType = res.headers.get('content-type');
-      if (contentType) mimeType = contentType;
+      if (contentType) mediaType = toImageMediaType(contentType);
     }
 
-    const modelsToTry = ['gemini-3.6-flash', 'gemini-3.5-flash-lite'];
-    for (const model of modelsToTry) {
-      try {
-        const response = await ai.models.generateContent({
-          model,
-          contents: [
+    const response = await client.messages.parse({
+      model: MODEL,
+      max_tokens: 4000,
+      output_config: {
+        effort: 'low',
+        format: zodOutputFormat(FaceAnalysisSchema),
+      },
+      messages: [
+        {
+          role: 'user',
+          content: [
             {
-              role: 'user',
-              parts: [
-                { text: prompt },
-                {
-                  inlineData: {
-                    mimeType: mimeType,
-                    data: base64Data,
-                  },
-                },
-              ],
+              type: 'image',
+              source: { type: 'base64', media_type: mediaType, data: base64Data },
             },
+            { type: 'text', text: prompt },
           ],
-          config: {
-            responseMimeType: 'application/json',
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                isHuman: { type: Type.BOOLEAN },
-                scoreBonus: { type: Type.INTEGER },
-                comment: { type: Type.STRING },
-              },
-              required: ['isHuman', 'scoreBonus', 'comment'],
-            },
-          },
-        });
+        },
+      ],
+    });
 
-        if (response.text) {
-          const parsed = JSON.parse(response.text) as GeminiFaceAnalysisResult;
-          return parsed;
-        }
-      } catch (modelError) {
-        console.warn(`Gemini model ${model} failed, trying next model:`, modelError);
-      }
+    if (response.stop_reason === 'refusal' || !response.parsed_output) {
+      return null;
     }
+    return response.parsed_output;
   } catch (error) {
-    console.error('Gemini Face Analysis Error:', error);
+    console.error('Claude Face Analysis Error:', error);
   }
   return null;
 }
@@ -110,9 +113,9 @@ export async function analyzeFaceWithGemini(params: {
 export function calculateFaceScore(params?: {
   faceRating?: FaceRating | null;
   faceImageUrl?: string | null;
-  geminiAnalysis?: GeminiFaceAnalysisResult | null;
+  faceAnalysis?: FaceAnalysisResult | null;
 }): FaceScoreResult {
-  const { faceRating, faceImageUrl, geminiAnalysis } = params || {};
+  const { faceRating, faceImageUrl, faceAnalysis } = params || {};
 
   // 1. 自己評価ベーススコア
   let baseScore = 70;
@@ -140,11 +143,11 @@ export function calculateFaceScore(params?: {
   let rawValue = `自己評価: ${ratingLabel}`;
 
   if (hasUploadedPhoto) {
-    if (geminiAnalysis) {
-      if (geminiAnalysis.isHuman) {
-        photoBonus = Math.min(10, Math.max(5, geminiAnalysis.scoreBonus));
-        aiNotes = `【AI写真解析】: ${geminiAnalysis.comment} (+${photoBonus}pt加算)`;
-        rawValue = `自己評価: ${ratingLabel} ＋ AI写真解析: 「${geminiAnalysis.comment}」 (+${photoBonus}pt)`;
+    if (faceAnalysis) {
+      if (faceAnalysis.isHuman) {
+        photoBonus = Math.min(10, Math.max(5, faceAnalysis.scoreBonus));
+        aiNotes = `【AI写真解析】: ${faceAnalysis.comment} (+${photoBonus}pt加算)`;
+        rawValue = `自己評価: ${ratingLabel} ＋ AI写真解析: 「${faceAnalysis.comment}」 (+${photoBonus}pt)`;
       } else {
         photoBonus = 0;
         aiNotes = '【AI写真解析】: 人物の顔写真が確認できなかったため、写真ボーナスは適用されませんでした。';
@@ -169,8 +172,8 @@ export function calculateFaceScore(params?: {
     score: finalScore,
     percentile: null,
     topPercent: null,
-    dataQuality: geminiAnalysis?.isHuman ? 'AI' : (hasUploadedPhoto ? 'AI' : 'USER_INPUT'),
-    datasetName: geminiAnalysis?.isHuman ? 'AI容姿・清潔感査定モデル' : 'SPEC CHECK 容姿・雰囲気査定モデル V2.0',
+    dataQuality: faceAnalysis?.isHuman ? 'AI' : (hasUploadedPhoto ? 'AI' : 'USER_INPUT'),
+    datasetName: faceAnalysis?.isHuman ? 'AI容姿・清潔感査定モデル' : 'SPEC CHECK 容姿・雰囲気査定モデル V2.0',
     sourceUrl: '',
     surveyYear: 2026,
     calculationMethod: 'STATISTICAL_MODEL_ESTIMATE',

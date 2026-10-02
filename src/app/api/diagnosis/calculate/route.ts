@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       }
     }
 
-    // 1. スコア計算の実行 (Gemini AI非同期試行 ➔ 失敗時は安全な同期エンジンへフォールバック)
+    // 1. スコア計算の実行 (Claude AI非同期試行 ➔ 失敗時は安全な同期エンジンへフォールバック)
     let result;
     try {
       result = await runDiagnosisV3Async(body);
