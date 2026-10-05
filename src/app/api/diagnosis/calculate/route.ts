@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { DiagnosisInputV3 } from '@/types/spec-check';
 import { runDiagnosisV3, runDiagnosisV3Async } from '@/lib/score-engine';
 import { saveDiagnosis } from '@/lib/storage/diagnosis-store';
+import { POSITION_MASTER_BY_EMPLOYMENT } from '@/lib/datasets/japan-stats';
 
 export async function POST(request: Request) {
   try {
@@ -21,7 +22,33 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!body.faceRating) {
+      return NextResponse.json({ error: '雰囲気・第一印象の自己評価を選択してください。' }, { status: 400 });
+    }
+    if (!body.academicDegree) {
+      return NextResponse.json({ error: '最終学歴を選択してください。' }, { status: 400 });
+    }
+    if (!body.employmentType) {
+      return NextResponse.json({ error: '雇用形態を選択してください。' }, { status: 400 });
+    }
+
+    // 居住地は未指定なら東京都を既定値とする
+    if (!body.prefectureId || !body.prefectureName) {
+      body.prefectureId = 13;
+      body.prefectureName = '東京都';
+    }
+
     if (body.employmentType !== 'UNEMPLOYED') {
+      if (!body.industryCode) {
+        return NextResponse.json({ error: '業種を選択してください。' }, { status: 400 });
+      }
+      if (!body.occupationCode) {
+        return NextResponse.json({ error: '職種を選択してください。' }, { status: 400 });
+      }
+      const positions = POSITION_MASTER_BY_EMPLOYMENT[body.employmentType] || [];
+      if (positions.length > 0 && !body.positionCode) {
+        return NextResponse.json({ error: '役職を選択してください。' }, { status: 400 });
+      }
       const hasCompanyName = Boolean(body.companyName && body.companyName.trim() !== '');
       const hasCompanyCategory = Boolean(body.companyCategory && String(body.companyCategory).trim() !== '');
       if (!hasCompanyName && !hasCompanyCategory) {
