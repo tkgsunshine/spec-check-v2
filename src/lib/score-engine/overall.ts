@@ -185,8 +185,15 @@ export function runDiagnosisV3(input: DiagnosisInputV3): OverallDiagnosisResultV
     });
   }
 
-  const epithet = generateEpithetTitle(japanOverallScore, input, allMetrics);
-  const loveEpithet = generateLoveEpithetTitle(loveResult.loveOverallScore, input, allMetrics);
+  
+  const categoryScores: OverallDiagnosisResultV3['categoryScores'] = {
+    body: bodyResult.totalBodyScore,
+    economic: totalEconomicScore,
+    career: careerResult.totalCareerScore,
+    academic: academicResult.totalAcademicScore,
+    social: snsResult.snsScore.score,
+    ability: totalGlobalScore,
+  };
 
   return {
     diagnosisId,
@@ -200,16 +207,9 @@ export function runDiagnosisV3(input: DiagnosisInputV3): OverallDiagnosisResultV
     },
     japanOverallScore,
     loveOverallScore: loveResult.loveOverallScore,
-    epithet,
-    loveEpithet,
-    categoryScores: {
-      body: bodyResult.totalBodyScore,
-      economic: totalEconomicScore,
-      career: careerResult.totalCareerScore,
-      academic: academicResult.totalAcademicScore,
-      social: snsResult.snsScore.score,
-      ability: totalGlobalScore,
-    },
+    epithet: generateEpithetTitle(japanOverallScore, input, categoryScores),
+    loveEpithet: generateLoveEpithetTitle(loveResult.loveOverallScore, input, loveResult.loveCategoryScores, categoryScores.social),
+    categoryScores,
     loveCategoryScores: loveResult.loveCategoryScores,
     metrics: allMetrics,
     missingMetrics,
@@ -393,8 +393,15 @@ export async function runDiagnosisV3Async(input: DiagnosisInputV3): Promise<Over
     });
   }
 
-  const epithet = generateEpithetTitle(japanOverallScore, input, allMetrics);
-  const loveEpithet = generateLoveEpithetTitle(loveResult.loveOverallScore, input, allMetrics);
+  
+  const categoryScores: OverallDiagnosisResultV3['categoryScores'] = {
+    body: bodyResult.totalBodyScore,
+    economic: totalEconomicScore,
+    career: careerResult.totalCareerScore,
+    academic: academicResult.totalAcademicScore,
+    social: snsResult.snsScore.score,
+    ability: totalGlobalScore,
+  };
 
   return {
     diagnosisId,
@@ -408,16 +415,9 @@ export async function runDiagnosisV3Async(input: DiagnosisInputV3): Promise<Over
     },
     japanOverallScore,
     loveOverallScore: loveResult.loveOverallScore,
-    epithet,
-    loveEpithet,
-    categoryScores: {
-      body: bodyResult.totalBodyScore,
-      economic: totalEconomicScore,
-      career: careerResult.totalCareerScore,
-      academic: academicResult.totalAcademicScore,
-      social: snsResult.snsScore.score,
-      ability: totalGlobalScore,
-    },
+    epithet: generateEpithetTitle(japanOverallScore, input, categoryScores),
+    loveEpithet: generateLoveEpithetTitle(loveResult.loveOverallScore, input, loveResult.loveCategoryScores, categoryScores.social),
+    categoryScores,
     loveCategoryScores: loveResult.loveCategoryScores,
     metrics: allMetrics,
     missingMetrics,

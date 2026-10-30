@@ -135,11 +135,31 @@ export interface DiagnosisInputV3 {
 
 export type DiagnosisInput = DiagnosisInputV3;
 
+export interface CharacterTypeAxis {
+  /** 軸の名前（例: 財力 vs 知力） */
+  label: string;
+  /** その軸で判定された側（例: 財力） */
+  result: string;
+  letter: string;
+}
+
+export interface CharacterTypeRef {
+  code: string;
+  name: string;
+  emoji: string;
+}
+
 export interface EpithetResult {
   title: string;
   subtitle: string;
   rarityBadge: string;
   rarityColor: string;
+  /** MBTI風の16タイプ（2026-10 以降の診断のみ。古い結果には無い） */
+  typeCode?: string;
+  typeName?: string;
+  typeEmoji?: string;
+  typeAxes?: CharacterTypeAxis[];
+  bestMatch?: CharacterTypeRef;
 }
 
 export interface OverallDiagnosisResultV3 {
