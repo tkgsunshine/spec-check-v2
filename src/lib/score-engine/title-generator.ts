@@ -43,9 +43,9 @@ export const OVERALL_TYPES: Record<string, CharacterTypeDef> = {
   BCQF: { code: 'BCQF', name: '参謀', emoji: '♟️', title: '冷静沈着な組織の参謀', subtitle: '表に立たずとも戦略はこの人から。自己管理も完璧な、組織に欠かせない頭脳派ナンバー2', color: 'from-cyan-300 via-blue-300 to-indigo-500' },
   BCQD: { code: 'BCQD', name: '生き字引', emoji: '📜', title: '組織のすべてを知る生き字引', subtitle: '深い知識と落ち着いた判断で、組織を内側から支える。困ったときに最後に頼られる静かな実力者', color: 'from-teal-300 via-cyan-200 to-blue-400' },
   BGLF: { code: 'BGLF', name: '越境者', emoji: '🌐', title: 'どの国でも主役になれる越境者', subtitle: '国境も業界も軽々と越える。知性と行動力と華やかさで、どこへ行っても主役になれるタイプ', color: 'from-sky-400 via-emerald-300 to-yellow-300' },
-  BGLD: { code: 'BGLD', name: '発明家', emoji: '💡', title: 'アイデアで世界を変えるイノベーター', subtitle: '常識にとらわれない発想を、言葉にして世に出す。周りを巻き込み新しいものを生み出すタイプ', color: 'from-yellow-300 via-lime-300 to-cyan-400' },
+  BGLD: { code: 'BGLD', name: 'マッドサイエンティスト', emoji: '🧪', title: 'ひらめきで世界を変える狂気の天才', subtitle: '常識にとらわれない発想を、言葉にして世に出す。周りを巻き込み、誰も思いつかないものを生み出すタイプ', color: 'from-yellow-300 via-lime-300 to-cyan-400' },
   BGQF: { code: 'BGQF', name: '忍者', emoji: '🥷', title: '静かに牙を研ぐ知性派ニンジャ', subtitle: '目立たず、群れず、でも実はハイスペ。知性と鍛えた体で、いざという時に一番強い', color: 'from-slate-300 via-violet-300 to-indigo-500' },
-  BGQD: { code: 'BGQD', name: '研究者', emoji: '🔭', title: '我が道を極める孤高の研究者', subtitle: '他人の評価より自分の探究心。好きなことをとことん突き詰め、独自の世界を築くタイプ', color: 'from-indigo-400 via-blue-300 to-teal-300' },
+  BGQD: { code: 'BGQD', name: '仙人', emoji: '🐉', title: '俗世を離れて道を極める仙人', subtitle: '他人の評価より自分の探究心。好きなことをとことん突き詰め、独自の世界を築く孤高の存在', color: 'from-indigo-400 via-blue-300 to-teal-300' },
 };
 
 // ───────────────────────── 恋愛モード ─────────────────────────
@@ -54,20 +54,20 @@ export const OVERALL_TYPES: Record<string, CharacterTypeDef> = {
 export const LOVE_TYPES: Record<string, CharacterTypeDef> = {
   VHYR: { code: 'VHYR', name: '小悪魔', emoji: '😈', title: '恋を量産する天性の小悪魔', subtitle: '見た目の華と積極性で、気づけば相手を夢中にさせている。恋愛を全力で楽しむ天性のモテ体質', color: 'from-fuchsia-400 via-pink-300 to-rose-400' },
   VHYK: { code: 'VHYK', name: 'モテエース', emoji: '🔥', title: '若くして本命を射抜くモテエース', subtitle: 'ルックスと行動力で出会いを逃さず、遊びより本命狙い。早めのゴールインも狙える即戦力', color: 'from-rose-400 via-orange-300 to-amber-300' },
-  VHMR: { code: 'VHMR', name: '色気の魔術師', emoji: '🍷', title: '大人の色気で酔わせる魔術師', subtitle: '余裕のある振る舞いと色気で、会った人を虜にする。恋の駆け引きを知り尽くした大人', color: 'from-rose-500 via-red-300 to-purple-400' },
+  VHMR: { code: 'VHMR', name: '罪な人', emoji: '🌹', title: '恋の駆け引きを知り尽くした罪な人', subtitle: '余裕のある振る舞いと色気で、会った人を虜にする。本人にその気がなくても相手を本気にさせてしまう', color: 'from-rose-500 via-red-300 to-purple-400' },
   VHMK: { code: 'VHMK', name: '選ばれし本命', emoji: '🌹', title: '誰もが狙う大人の本命', subtitle: '洗練された見た目と自分から動ける積極性。結婚相手として真っ先に名前が挙がる大人の本命', color: 'from-rose-400 via-pink-200 to-amber-300' },
-  VPYR: { code: 'VPYR', name: '天使', emoji: '🌸', title: '守りたくなる透明感の天使', subtitle: '自分からガツガツいかないのに好かれる。透明感と素直さで、周りが放っておかないタイプ', color: 'from-pink-300 via-rose-200 to-sky-300' },
-  VPYK: { code: 'VPYK', name: '忠犬', emoji: '🐶', title: '一途に尽くす忠犬系ピュアラバー', subtitle: '見た目の良さに反して恋は一途。決めた相手をまっすぐ大切にする、裏切らない愛されキャラ', color: 'from-amber-300 via-pink-200 to-rose-300' },
+  VPYR: { code: 'VPYR', name: '妖精', emoji: '🧚', title: '触れたら消えそうな透明感の妖精', subtitle: '自分からガツガツいかないのに好かれる。透明感と素直さで、周りが放っておかないタイプ', color: 'from-pink-300 via-rose-200 to-sky-300' },
+  VPYK: { code: 'VPYK', name: '一途の化身', emoji: '💌', title: '決めたら一生、一途の化身', subtitle: '見た目の良さに反して恋は一途。決めた相手をまっすぐ大切にする、裏切らない愛されキャラ', color: 'from-amber-300 via-pink-200 to-rose-300' },
   VPMR: { code: 'VPMR', name: '高嶺の花', emoji: '🌙', title: 'ミステリアスな高嶺の花', subtitle: '近寄りがたいほどの雰囲気で、追われる側の恋が基本。簡単には手に入らない謎めいた魅力', color: 'from-indigo-300 via-violet-300 to-pink-300' },
-  VPMK: { code: 'VPMK', name: '癒やし系', emoji: '🕊️', title: '穏やか美形の癒やし系パートナー', subtitle: '整った見た目と落ち着いた空気感。一緒にいるだけでほっとする、長く続く関係を作るタイプ', color: 'from-sky-300 via-teal-200 to-pink-200' },
+  VPMK: { code: 'VPMK', name: 'マイナスイオン', emoji: '🌿', title: 'そばにいるだけで癒やすマイナスイオン', subtitle: '整った見た目と落ち着いた空気感。一緒にいるだけでほっとする、長く続く関係を作るタイプ', color: 'from-sky-300 via-teal-200 to-pink-200' },
   SHYR: { code: 'SHYR', name: '肉食ハイスペ', emoji: '⚡', title: 'ノリと勢いのハイスペ肉食系', subtitle: '若さとステータスを武器に、出会いの場で全力アタック。恋も仕事も攻めの姿勢を崩さない', color: 'from-yellow-300 via-orange-300 to-rose-400' },
   SHYK: { code: 'SHYK', name: '婚活エリート', emoji: '💍', title: '最短でゴールインする婚活エリート', subtitle: '若くして安定した基盤と行動力。結婚までの最短ルートを知っている、婚活市場の優等生', color: 'from-amber-300 via-yellow-200 to-pink-300' },
-  SHMR: { code: 'SHMR', name: 'エスコート上級者', emoji: '🎩', title: 'エスコート上手な大人の社交家', subtitle: 'お店選びも会話も完璧。ステータスと経験に裏打ちされたスマートなエスコートで魅せる', color: 'from-violet-400 via-purple-300 to-amber-300' },
+  SHMR: { code: 'SHMR', name: '港区の住人', emoji: '🥂', title: '港区を庭にするエスコート巧者', subtitle: 'お店選びも会話も完璧。ステータスと経験に裏打ちされたスマートなエスコートで魅せる大人', color: 'from-violet-400 via-purple-300 to-amber-300' },
   SHMK: { code: 'SHMK', name: '大黒柱', emoji: '🏰', title: '包容力MAXの頼れる大黒柱', subtitle: '経済力と決断力で、パートナーと家庭をまるごと支える。安心感なら誰にも負けないタイプ', color: 'from-emerald-300 via-teal-200 to-amber-300' },
   SPYR: { code: 'SPYR', name: '文学青年', emoji: '📖', title: '隠れハイスペの文学系ロマンチスト', subtitle: '控えめだけど中身はハイスペ。好きな人のことを静かに想い続ける、知る人ぞ知るロマンチスト', color: 'from-indigo-300 via-sky-200 to-pink-300' },
   SPYK: { code: 'SPYK', name: '安定株', emoji: '🌱', title: '堅実に育つ将来有望の安定株', subtitle: '派手さはないけど将来性はピカイチ。付き合うほど良さがわかる、結婚向きの堅実派', color: 'from-emerald-300 via-lime-200 to-teal-300' },
   SPMR: { code: 'SPMR', name: '沼系インテリ', emoji: '🎻', title: '知性で落とす沼系インテリ', subtitle: '会話の深さと大人の余裕で、気づいたら抜け出せない。じわじわハマらせる沼系タイプ', color: 'from-purple-400 via-indigo-300 to-teal-300' },
-  SPMK: { code: 'SPMK', name: '鉄壁パートナー', emoji: '🏡', title: '浮気ゼロの鉄壁パートナー', subtitle: '誠実さと生活力は折り紙付き。穏やかで安定した家庭を築ける、最も信頼できるパートナー', color: 'from-teal-300 via-emerald-200 to-sky-300' },
+  SPMK: { code: 'SPMK', name: '不動の本命', emoji: '🗿', title: '何があっても揺るがない不動の本命', subtitle: '誠実さと生活力は折り紙付き。浮気も心変わりもなく、穏やかで安定した家庭を築ける最も信頼できるパートナー', color: 'from-teal-300 via-emerald-200 to-sky-300' },
 };
 
 // ───────────────────────── 共通 ─────────────────────────
