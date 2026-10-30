@@ -52,7 +52,7 @@ export const OVERALL_TYPES: Record<string, CharacterTypeDef> = {
 // 軸1 V ビジュアル / S ステータス、軸2 H 肉食 / P 草食、軸3 Y フレッシュ / M 大人、軸4 R ロマン / K 結婚
 
 export const LOVE_TYPES: Record<string, CharacterTypeDef> = {
-  VHYR: { code: 'VHYR', name: '小悪魔', emoji: '😈', title: '恋を量産する天性の小悪魔', subtitle: '見た目の華と積極性で、気づけば相手を夢中にさせている。恋愛を全力で楽しむ天性のモテ体質', color: 'from-fuchsia-400 via-pink-300 to-rose-400' },
+  VHYR: { code: 'VHYR', name: '恋愛ジャンキー', emoji: '💘', title: '恋してないと生きられない恋愛ジャンキー', subtitle: '見た目の華と積極性で、気づけば次の恋が始まっている。恋愛を全力で楽しむ天性のモテ体質', color: 'from-fuchsia-400 via-pink-300 to-rose-400' },
   VHYK: { code: 'VHYK', name: 'モテエース', emoji: '🏹', title: '若くして本命を射抜くモテエース', subtitle: 'ルックスと行動力で出会いを逃さず、遊びより本命狙い。早めのゴールインも狙える即戦力', color: 'from-rose-400 via-orange-300 to-amber-300' },
   VHMR: { code: 'VHMR', name: '罪な人', emoji: '🌹', title: '恋の駆け引きを知り尽くした罪な人', subtitle: '余裕のある振る舞いと色気で、会った人を虜にする。本人にその気がなくても相手を本気にさせてしまう', color: 'from-rose-500 via-red-300 to-purple-400' },
   VHMK: { code: 'VHMK', name: '選ばれし本命', emoji: '💎', title: '誰もが狙う大人の本命', subtitle: '洗練された見た目と自分から動ける積極性。結婚相手として真っ先に名前が挙がる大人の本命', color: 'from-rose-400 via-pink-200 to-amber-300' },
