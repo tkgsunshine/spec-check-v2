@@ -30,7 +30,7 @@ type LoveCategoryScores = OverallDiagnosisResultV3['loveCategoryScores'];
 // 軸1 M 財力 / B 知力、軸2 C 組織 / G 越境、軸3 L 発信 / Q 潜伏、軸4 F 見た目 / D 中身
 
 export const OVERALL_TYPES: Record<string, CharacterTypeDef> = {
-  MCLF: { code: 'MCLF', name: 'キング', emoji: '👑', title: '会社の顔になる王道エース', subtitle: '稼ぐ力・存在感・見た目がそろった組織のど真ん中。どこにいても自然と中心に立つ王道タイプ', color: 'from-amber-300 via-yellow-200 to-amber-500' },
+  MCLF: { code: 'MCLF', name: '覇王', emoji: '👑', title: '会社の顔になる王道エース', subtitle: '稼ぐ力・存在感・見た目がそろった組織のど真ん中。どこにいても自然と中心に立つ王道タイプ', color: 'from-amber-300 via-yellow-200 to-amber-500' },
   MCLD: { code: 'MCLD', name: '社交家', emoji: '🥂', title: '人脈で稼ぐ社交派ビジネスマン', subtitle: '組織の看板と人とのつながりを武器に、会話ひとつで仕事と収入を引き寄せる交渉上手', color: 'from-orange-300 via-amber-200 to-rose-400' },
   MCQF: { code: 'MCQF', name: 'ガーディアン', emoji: '🛡️', title: '黙々と稼ぐ鉄壁の守護者', subtitle: '目立たずとも結果は確実。自己管理と安定収入で、周りを静かに守り抜く頼れる存在', color: 'from-slate-300 via-sky-200 to-blue-400' },
   MCQD: { code: 'MCQD', name: '金庫番', emoji: '🏦', title: '静かに資産を積み上げる堅実派', subtitle: '派手さより確実さ。組織の安定基盤の上で、着実にお金と信頼を貯めていくタイプ', color: 'from-emerald-300 via-teal-200 to-cyan-400' },
