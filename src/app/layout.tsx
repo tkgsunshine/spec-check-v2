@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -110,7 +111,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Sticky Site Header */}
         <header className="w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-xl sticky top-0 z-50 shadow-lg">
           <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
-            <a href="/" className="flex items-center gap-2.5 group transition-all">
+            <Link href="/" className="flex items-center gap-2.5 group transition-all">
               {/* Cyberpunk 3D Neon SPEC Capsule Badge */}
               <div className="relative flex items-center justify-center px-2.5 py-0.5 rounded-full bg-slate-900 border border-pink-500/60 shadow-[0_0_12px_rgba(236,72,153,0.35)] group-hover:shadow-[0_0_20px_rgba(236,72,153,0.6)] group-hover:border-pink-400 transition-all overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-cyan-500/20 opacity-70 group-hover:opacity-100 transition-opacity" />
@@ -121,15 +122,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <span className="font-extrabold text-base md:text-lg tracking-tight text-white group-hover:text-pink-100 transition-colors drop-shadow-sm">
                 人間スペック診断
               </span>
-            </a>
+            </Link>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] md:text-xs font-extrabold text-slate-300 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 shadow-inner">
+              <Link href="/column" className="text-[11px] md:text-xs font-extrabold text-slate-300 hover:text-white px-2 py-1 transition-colors">
+                コラム
+              </Link>
+              <span className="hidden sm:inline text-[10px] md:text-xs font-extrabold text-slate-300 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 shadow-inner">
                 📊 政府公式統計データ連動
               </span>
             </div>
           </div>
         </header>
         <div className="flex-1 w-full max-w-full overflow-x-hidden">{children}</div>
+        <footer className="w-full border-t border-slate-800/80 bg-slate-950">
+          <div className="max-w-3xl mx-auto px-4 py-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-500">
+            <Link href="/" className="hover:text-slate-300 transition-colors">人間スペック診断</Link>
+            <Link href="/column" className="hover:text-slate-300 transition-colors">コラム</Link>
+          </div>
+        </footer>
       </body>
     </html>
   );
