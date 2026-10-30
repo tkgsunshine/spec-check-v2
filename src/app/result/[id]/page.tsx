@@ -386,12 +386,48 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
             </span>
           </div>
 
+          {currentEpithet.typeCode && (
+            <div className="mb-1">
+              <div className="text-5xl sm:text-6xl leading-none mb-2 drop-shadow-lg" aria-hidden>{currentEpithet.typeEmoji}</div>
+              <div className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-wide">
+                {isLoveMode ? 'あなたの恋愛タイプ' : 'あなたのスペックタイプ'}
+              </div>
+              <div className="text-lg sm:text-xl font-black text-white">
+                <span className="font-mono tracking-[0.2em] text-amber-300 mr-2">{currentEpithet.typeCode}</span>
+                {currentEpithet.typeName}
+              </div>
+            </div>
+          )}
+
           <div className={`text-2xl sm:text-3xl md:text-4xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r ${currentEpithet.rarityColor} drop-shadow-md py-1`}>
             『 {currentEpithet.title} 』
           </div>
           <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 leading-relaxed max-w-2xl mx-auto">
             {currentEpithet.subtitle}
           </p>
+
+          {currentEpithet.typeAxes && currentEpithet.typeAxes.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 max-w-2xl mx-auto">
+              {currentEpithet.typeAxes.map((axis) => (
+                <div key={axis.label} className="rounded-xl bg-slate-900/80 border border-slate-800 px-2 py-1.5">
+                  <div className="text-[10px] text-slate-500 font-bold">{axis.label}</div>
+                  <div className="text-xs sm:text-sm font-black text-slate-100">
+                    <span className="font-mono text-amber-300 mr-1">{axis.letter}</span>{axis.result}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {currentEpithet.bestMatch && (
+            <div className="mt-3 text-xs sm:text-sm text-slate-300">
+              相性◎のタイプ：
+              <span className="font-black text-white">
+                {currentEpithet.bestMatch.emoji} {currentEpithet.bestMatch.name}
+                <span className="font-mono text-amber-300 ml-1">（{currentEpithet.bestMatch.code}）</span>
+              </span>
+            </div>
+          )}
         </div>
       )}
 

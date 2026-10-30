@@ -180,8 +180,12 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
 
         <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 max-w-lg mx-auto flex items-center justify-around gap-2 text-center">
           <div>
-            <span className="text-[10px] font-bold text-slate-400 block">獲得した二つ名</span>
-            <span className="text-xs sm:text-sm font-black text-amber-300">『{currentEpithet?.title || "ハイスペック候補"}』</span>
+            <span className="text-[10px] font-bold text-slate-400 block">{currentEpithet?.typeCode ? "あなたのタイプ" : "獲得した二つ名"}</span>
+            <span className="text-xs sm:text-sm font-black text-amber-300">
+              {currentEpithet?.typeCode
+                ? `${currentEpithet.typeEmoji ?? ""} ${currentEpithet.typeName}（${currentEpithet.typeCode}）`
+                : `『${currentEpithet?.title || "ハイスペック候補"}』`}
+            </span>
           </div>
           <div className="h-8 w-px bg-slate-800" />
           <div>

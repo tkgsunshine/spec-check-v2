@@ -1,414 +1,205 @@
-import { DiagnosisInputV3, EpithetResult, MetricScoreResult } from '@/types/spec-check';
+import {
+  CharacterTypeAxis,
+  CharacterTypeRef,
+  DiagnosisInputV3,
+  EpithetResult,
+  OverallDiagnosisResultV3,
+} from '@/types/spec-check';
 
 /**
- * ユーザーのスペック診断結果に基づく「二つ名（称号・キャッチコピー）」動的生成エンジン (総合スペックモード)
+ * MBTI風「16キャラタイプ」判定エンジン
+ *
+ * 総合モード・恋愛モードそれぞれ 4軸 × 2択 = 16タイプ。
+ * ティア（SS〜C）はスコアで決まり、タイプはスコアの「バランス・傾向」で決まる。
+ * 各軸の基準値は、カテゴリスコアの中央値付近に置いて、どちらかに偏りすぎないようにしている。
+ */
+
+export interface CharacterTypeDef {
+  code: string;
+  name: string;
+  emoji: string;
+  title: string;
+  subtitle: string;
+  color: string;
+}
+
+type CategoryScores = OverallDiagnosisResultV3['categoryScores'];
+type LoveCategoryScores = OverallDiagnosisResultV3['loveCategoryScores'];
+
+// ───────────────────────── 総合モード ─────────────────────────
+// 軸1 M 財力 / B 知力、軸2 C 組織 / G 越境、軸3 L 発信 / Q 潜伏、軸4 F 見た目 / D 中身
+
+export const OVERALL_TYPES: Record<string, CharacterTypeDef> = {
+  MCLF: { code: 'MCLF', name: 'キング', emoji: '👑', title: '会社の顔になる王道エース', subtitle: '稼ぐ力・存在感・見た目がそろった組織のど真ん中。どこにいても自然と中心に立つ王道タイプ', color: 'from-amber-300 via-yellow-200 to-amber-500' },
+  MCLD: { code: 'MCLD', name: '社交家', emoji: '🥂', title: '人脈で稼ぐ社交派ビジネスマン', subtitle: '組織の看板と人とのつながりを武器に、会話ひとつで仕事と収入を引き寄せる交渉上手', color: 'from-orange-300 via-amber-200 to-rose-400' },
+  MCQF: { code: 'MCQF', name: 'ガーディアン', emoji: '🛡️', title: '黙々と稼ぐ鉄壁の守護者', subtitle: '目立たずとも結果は確実。自己管理と安定収入で、周りを静かに守り抜く頼れる存在', color: 'from-slate-300 via-sky-200 to-blue-400' },
+  MCQD: { code: 'MCQD', name: '金庫番', emoji: '🏦', title: '静かに資産を積み上げる堅実派', subtitle: '派手さより確実さ。組織の安定基盤の上で、着実にお金と信頼を貯めていくタイプ', color: 'from-emerald-300 via-teal-200 to-cyan-400' },
+  MGLF: { code: 'MGLF', name: 'ライオン', emoji: '🦁', title: '自力で稼ぐ野心家の百獣の王', subtitle: '組織に頼らず、腕っぷしと存在感で市場を切り開く。欲しいものは自分で取りにいく野心家', color: 'from-amber-400 via-orange-300 to-red-400' },
+  MGLD: { code: 'MGLD', name: '起業家', emoji: '🚀', title: '人を巻き込むカリスマ起業家', subtitle: '語る夢に人とお金が集まる。発信力と行動力で、ゼロから稼ぐ仕組みを作るカリスマ', color: 'from-fuchsia-400 via-pink-300 to-orange-300' },
+  MGQF: { code: 'MGQF', name: '一匹狼', emoji: '🐺', title: '群れずに稼ぐ孤高のハンター', subtitle: '馴れ合いは不要。鍛えた体と実力だけで獲物を仕留める、寡黙で自由なハンター', color: 'from-slate-400 via-indigo-300 to-slate-200' },
+  MGQD: { code: 'MGQD', name: 'フィクサー', emoji: '🦉', title: '裏で富を動かす影の投資家', subtitle: '表には出ないが、気づけば一番稼いでいる。冷静な判断で資産を動かす影の実力者', color: 'from-violet-400 via-purple-300 to-emerald-300' },
+  BCLF: { code: 'BCLF', name: '生徒会長', emoji: '⭐', title: '文武両道のみんなのリーダー', subtitle: '頭脳も見た目も発信力も高水準。組織の中で自然と推される、優等生型のリーダー', color: 'from-sky-300 via-indigo-300 to-violet-400' },
+  BCLD: { code: 'BCLD', name: '教授', emoji: '🎓', title: '知識を広める教授系インフルエンサー', subtitle: '学んだことを人に伝えるのが得意。組織の中で「あの人に聞けば大丈夫」と頼られる知の発信源', color: 'from-blue-400 via-indigo-300 to-violet-500' },
+  BCQF: { code: 'BCQF', name: '参謀', emoji: '♟️', title: '冷静沈着な組織の参謀', subtitle: '表に立たずとも戦略はこの人から。自己管理も完璧な、組織に欠かせない頭脳派ナンバー2', color: 'from-cyan-300 via-blue-300 to-indigo-500' },
+  BCQD: { code: 'BCQD', name: '賢者', emoji: '📚', title: '知性で組織を支える縁の下の賢者', subtitle: '深い知識と落ち着いた判断で、組織を内側から支える。知る人ぞ知る静かな実力者', color: 'from-teal-300 via-cyan-200 to-blue-400' },
+  BGLF: { code: 'BGLF', name: '冒険家', emoji: '🌍', title: '世界を飛び回る知的冒険家', subtitle: '国境も業界も軽々と越える。知性と行動力と華やかさで、どこでも主役になれる冒険家', color: 'from-sky-400 via-emerald-300 to-yellow-300' },
+  BGLD: { code: 'BGLD', name: '発明家', emoji: '💡', title: 'アイデアで世界を変えるイノベーター', subtitle: '常識にとらわれない発想を、言葉にして世に出す。周りを巻き込み新しいものを生み出すタイプ', color: 'from-yellow-300 via-lime-300 to-cyan-400' },
+  BGQF: { code: 'BGQF', name: '忍者', emoji: '🥷', title: '静かに牙を研ぐ知性派ニンジャ', subtitle: '目立たず、群れず、でも実はハイスペ。知性と鍛えた体で、いざという時に一番強い', color: 'from-slate-300 via-violet-300 to-indigo-500' },
+  BGQD: { code: 'BGQD', name: '研究者', emoji: '🔭', title: '我が道を極める孤高の研究者', subtitle: '他人の評価より自分の探究心。好きなことをとことん突き詰め、独自の世界を築くタイプ', color: 'from-indigo-400 via-blue-300 to-teal-300' },
+};
+
+// ───────────────────────── 恋愛モード ─────────────────────────
+// 軸1 V ビジュアル / S ステータス、軸2 H 肉食 / P 草食、軸3 Y フレッシュ / M 大人、軸4 R ロマン / K 結婚
+
+export const LOVE_TYPES: Record<string, CharacterTypeDef> = {
+  VHYR: { code: 'VHYR', name: '小悪魔', emoji: '😈', title: '恋を量産する天性の小悪魔', subtitle: '見た目の華と積極性で、気づけば相手を夢中にさせている。恋愛を全力で楽しむ天性のモテ体質', color: 'from-fuchsia-400 via-pink-300 to-rose-400' },
+  VHYK: { code: 'VHYK', name: 'モテエース', emoji: '🔥', title: '若くして本命を射抜くモテエース', subtitle: 'ルックスと行動力で出会いを逃さず、遊びより本命狙い。早めのゴールインも狙える即戦力', color: 'from-rose-400 via-orange-300 to-amber-300' },
+  VHMR: { code: 'VHMR', name: '色気の魔術師', emoji: '🍷', title: '大人の色気で酔わせる魔術師', subtitle: '余裕のある振る舞いと色気で、会った人を虜にする。恋の駆け引きを知り尽くした大人', color: 'from-rose-500 via-red-300 to-purple-400' },
+  VHMK: { code: 'VHMK', name: '選ばれし本命', emoji: '🌹', title: '誰もが狙う大人の本命', subtitle: '洗練された見た目と自分から動ける積極性。結婚相手として真っ先に名前が挙がる大人の本命', color: 'from-rose-400 via-pink-200 to-amber-300' },
+  VPYR: { code: 'VPYR', name: '天使', emoji: '🌸', title: '守りたくなる透明感の天使', subtitle: '自分からガツガツいかないのに好かれる。透明感と素直さで、周りが放っておかないタイプ', color: 'from-pink-300 via-rose-200 to-sky-300' },
+  VPYK: { code: 'VPYK', name: '忠犬', emoji: '🐶', title: '一途に尽くす忠犬系ピュアラバー', subtitle: '見た目の良さに反して恋は一途。決めた相手をまっすぐ大切にする、裏切らない愛されキャラ', color: 'from-amber-300 via-pink-200 to-rose-300' },
+  VPMR: { code: 'VPMR', name: '高嶺の花', emoji: '🌙', title: 'ミステリアスな高嶺の花', subtitle: '近寄りがたいほどの雰囲気で、追われる側の恋が基本。簡単には手に入らない謎めいた魅力', color: 'from-indigo-300 via-violet-300 to-pink-300' },
+  VPMK: { code: 'VPMK', name: '癒やし系', emoji: '🕊️', title: '穏やか美形の癒やし系パートナー', subtitle: '整った見た目と落ち着いた空気感。一緒にいるだけでほっとする、長く続く関係を作るタイプ', color: 'from-sky-300 via-teal-200 to-pink-200' },
+  SHYR: { code: 'SHYR', name: '肉食ハイスペ', emoji: '⚡', title: 'ノリと勢いのハイスペ肉食系', subtitle: '若さとステータスを武器に、出会いの場で全力アタック。恋も仕事も攻めの姿勢を崩さない', color: 'from-yellow-300 via-orange-300 to-rose-400' },
+  SHYK: { code: 'SHYK', name: '婚活エリート', emoji: '💍', title: '最短でゴールインする婚活エリート', subtitle: '若くして安定した基盤と行動力。結婚までの最短ルートを知っている、婚活市場の優等生', color: 'from-amber-300 via-yellow-200 to-pink-300' },
+  SHMR: { code: 'SHMR', name: 'エスコート上級者', emoji: '🎩', title: 'エスコート上手な大人の社交家', subtitle: 'お店選びも会話も完璧。ステータスと経験に裏打ちされたスマートなエスコートで魅せる', color: 'from-violet-400 via-purple-300 to-amber-300' },
+  SHMK: { code: 'SHMK', name: '大黒柱', emoji: '🏰', title: '包容力MAXの頼れる大黒柱', subtitle: '経済力と決断力で、パートナーと家庭をまるごと支える。安心感なら誰にも負けないタイプ', color: 'from-emerald-300 via-teal-200 to-amber-300' },
+  SPYR: { code: 'SPYR', name: '文学青年', emoji: '📖', title: '隠れハイスペの文学系ロマンチスト', subtitle: '控えめだけど中身はハイスペ。好きな人のことを静かに想い続ける、知る人ぞ知るロマンチスト', color: 'from-indigo-300 via-sky-200 to-pink-300' },
+  SPYK: { code: 'SPYK', name: '安定株', emoji: '🌱', title: '堅実に育つ将来有望の安定株', subtitle: '派手さはないけど将来性はピカイチ。付き合うほど良さがわかる、結婚向きの堅実派', color: 'from-emerald-300 via-lime-200 to-teal-300' },
+  SPMR: { code: 'SPMR', name: '沼系インテリ', emoji: '🎻', title: '知性で落とす沼系インテリ', subtitle: '会話の深さと大人の余裕で、気づいたら抜け出せない。じわじわハマらせる沼系タイプ', color: 'from-purple-400 via-indigo-300 to-teal-300' },
+  SPMK: { code: 'SPMK', name: '鉄壁パートナー', emoji: '🏡', title: '浮気ゼロの鉄壁パートナー', subtitle: '誠実さと生活力は折り紙付き。穏やかで安定した家庭を築ける、最も信頼できるパートナー', color: 'from-teal-300 via-emerald-200 to-sky-300' },
+};
+
+// ───────────────────────── 共通 ─────────────────────────
+
+function toRef(def: CharacterTypeDef): CharacterTypeRef {
+  return { code: def.code, name: def.name, emoji: def.emoji };
+}
+
+/** 指定した位置の文字を反転させたコードを返す（相性タイプ用） */
+function flipLetters(code: string, positions: number[], pairs: [string, string][]): string {
+  return code
+    .split('')
+    .map((ch, i) => {
+      if (!positions.includes(i)) return ch;
+      const [a, b] = pairs[i];
+      return ch === a ? b : a;
+    })
+    .join('');
+}
+
+function tierBadge(score: number): string {
+  if (score >= 85) return `SS TIER`;
+  if (score >= 75) return `S TIER`;
+  if (score >= 65) return `A TIER`;
+  if (score >= 50) return `B TIER`;
+  return `C TIER`;
+}
+
+function mbtiLetter(input: DiagnosisInputV3, index: number): string | null {
+  const mbti = (input.mbti || '').trim().toUpperCase();
+  return /^[EI][SN][TF][JP]/.test(mbti) ? mbti[index] : null;
+}
+
+function buildResult(def: CharacterTypeDef, axes: CharacterTypeAxis[], match: CharacterTypeDef, badge: string): EpithetResult {
+  return {
+    title: def.title,
+    subtitle: def.subtitle,
+    rarityBadge: badge,
+    rarityColor: def.color,
+    typeCode: def.code,
+    typeName: def.name,
+    typeEmoji: def.emoji,
+    typeAxes: axes,
+    bestMatch: toRef(match),
+  };
+}
+
+const INDEPENDENT_EMPLOYMENT = ['FREELANCE', 'EXECUTIVE', 'SELF_EMPLOYED'];
+const OVERALL_PAIRS: [string, string][] = [['M', 'B'], ['C', 'G'], ['L', 'Q'], ['F', 'D']];
+const LOVE_PAIRS: [string, string][] = [['V', 'S'], ['H', 'P'], ['Y', 'M'], ['R', 'K']];
+
+/**
+ * 総合スペックのキャラタイプを判定する
  */
 export function generateEpithetTitle(
   overallScore: number,
   input: DiagnosisInputV3,
-  metrics: MetricScoreResult[]
+  scores: CategoryScores
 ): EpithetResult {
-  // 各メトリクスのスコア抽出
-  const incomeMetric = metrics.find(m => m.metricCode === 'INCOME' || m.metricCode === 'ANNUAL_INCOME');
-  const assetMetric = metrics.find(m => m.metricCode === 'NET_WORTH');
-  const academicMetric = metrics.find(m => m.metricCode === 'ACADEMIC_DEGREE' || m.metricCode === 'ACADEMIC_BACKGROUND');
-  const companyMetric = metrics.find(m => m.metricCode === 'COMPANY' || m.metricCode === 'OCCUPATION');
-  const iqMetric = metrics.find(m => m.metricCode === 'IQ_ESTIMATE');
+  // 軸1: 財力 vs 知力（中央値からの伸びで比べる）
+  const money = scores.economic - 80 >= scores.academic - 65;
+  // 軸2: 組織 vs 越境（独立した働き方、または語学・海外経験が豊富なら越境）
+  const go = INDEPENDENT_EMPLOYMENT.includes(input.employmentType) || scores.ability >= 60;
+  // 軸3: 発信 vs 潜伏（MBTI があれば E/I、なければ SNS の影響力）
+  const e = mbtiLetter(input, 0);
+  const loud = e ? e === 'E' : scores.social >= 52;
+  // 軸4: 見た目 vs 中身（身体スコア）
+  const fit = scores.body >= 65;
 
-  const incomeScore = incomeMetric ? incomeMetric.score : 0;
-  const assetScore = assetMetric ? assetMetric.score : 0;
-  const academicScore = academicMetric ? academicMetric.score : 0;
-  const companyScore = companyMetric ? companyMetric.score : 0;
-  const iqScore = iqMetric ? iqMetric.score : 0;
+  const code = `${money ? 'M' : 'B'}${go ? 'G' : 'C'}${loud ? 'L' : 'Q'}${fit ? 'F' : 'D'}`;
+  const axes: CharacterTypeAxis[] = [
+    { label: '財力 vs 知力', result: money ? '財力' : '知力', letter: code[0] },
+    { label: '組織 vs 越境', result: go ? '越境' : '組織', letter: code[1] },
+    { label: '発信 vs 潜伏', result: loud ? '発信' : '潜伏', letter: code[2] },
+    { label: '見た目 vs 中身', result: fit ? '見た目' : '中身', letter: code[3] },
+  ];
+  // 相性: 財力/知力 と 発信/潜伏 が逆のタイプ（足りないものを補い合う）
+  const matchCode = flipLetters(code, [0, 2], OVERALL_PAIRS);
 
-  const luxuryVal = input.luxuryAssets !== undefined && input.luxuryAssets !== null
-    ? (input.luxuryAssets || 0)
-    : ((input.carAssets || 0) + (input.watchAssets || 0));
-  const totalAssets = (input.savingsAssets || 0) + (input.financialAssets || 0) + (input.realEstateAssets || 0) + luxuryVal;
-  const totalDebts = (input.mortgageDebt || 0) + (input.carDebt || 0) + (input.scholarshipDebt || 0) + (input.otherDebt || 0);
-  const netWorth = totalAssets - totalDebts;
-
-  const languagesCount = input.languages ? input.languages.length : 1;
-  const travelCount = input.travelCount || 0;
-  const totalSnsFollowers = (input.instagramFollowers || 0) + (input.xFollowers || 0) + (input.tikTokFollowers || 0) + (input.youTubeFollowers || 0);
-  const annualIncomeVal = Number(input.annualIncome) || 0;
-
-  // 🏆 1. SS GOD TIER (総合スコア 85点以上)
-  if (overallScore >= 85) {
-    if (incomeScore >= 90 && assetScore >= 85) {
-      return {
-        title: '令和の資本主義モンスター',
-        subtitle: `年収・純資産ともに全国上位水準。圧倒的な経済力で時代を牽引する絶対的富裕層`,
-        rarityBadge: 'SS GOD TIER',
-        rarityColor: 'from-amber-400 via-amber-200 to-yellow-500',
-      };
-    }
-    if (academicScore >= 90 && (iqScore >= 85 || incomeScore >= 85)) {
-      return {
-        title: '天才的IQと財力を誇る現代の頭脳派チート',
-        subtitle: `最高峰の学歴・IQと卓越したマーケット価値を併せ持つ至高の知性派エリート`,
-        rarityBadge: 'SS GOD TIER',
-        rarityColor: 'from-amber-400 via-yellow-200 to-amber-500',
-      };
-    }
-    if (companyScore >= 90 || input.employmentType === 'EXECUTIVE') {
-      return {
-        title: '東証プライムを牽引する絶対的トップリーダー',
-        subtitle: `超優良企業・経営組織の中核として圧倒的プレゼンスを放つ最高峰ビジネスリーダー`,
-        rarityBadge: 'SS GOD TIER',
-        rarityColor: 'from-amber-300 via-yellow-100 to-amber-400',
-      };
-    }
-    return {
-      title: '人類の上位1%に君臨する神スペック',
-      subtitle: `全ステータスが高次元で結実。隙のない完璧なポテンシャルを誇る上位存在`,
-      rarityBadge: 'SS GOD TIER',
-      rarityColor: 'from-yellow-300 via-amber-200 to-amber-500',
-    };
-  }
-
-  // 🥇 2. S ELITE TIER (総合スコア 75 〜 84点)
-  if (overallScore >= 75) {
-    if (totalSnsFollowers >= 10000) {
-      return {
-        title: '時代を動かすインフルエンス覇者',
-        subtitle: `高いスペックと圧倒的発信力を兼ね備え、フォロワーを惹きつける現代のカリスマ`,
-        rarityBadge: 'S ELITE',
-        rarityColor: 'from-purple-400 via-fuchsia-300 to-pink-500',
-      };
-    }
-    if (languagesCount >= 2 || travelCount >= 5) {
-      return {
-        title: '国境を溶かすグローバル・マルチリンガル',
-        subtitle: `高度な語学力と豊富な渡航経験で、国籍を超えて世界で通用するグローバルプレイヤー`,
-        rarityBadge: 'S ELITE',
-        rarityColor: 'from-indigo-400 via-sky-300 to-blue-500',
-      };
-    }
-    if (netWorth >= 3000 || assetScore >= 80) {
-      return {
-        title: '歩く高利回りアセット・マスター',
-        subtitle: `堅実かつ強力な資産形成能力を誇り、揺るぎない財産を築き上げたマネーマスター`,
-        rarityBadge: 'S ELITE',
-        rarityColor: 'from-emerald-400 via-teal-300 to-green-500',
-      };
-    }
-    if (academicScore >= 80 || companyScore >= 85) {
-      return {
-        title: '経済界を支える次世代ハイキャリア',
-        subtitle: `名門学歴と高規格な職歴に支えられ、大企業の未来を担う正統派ハイキャリア`,
-        rarityBadge: 'S ELITE',
-        rarityColor: 'from-blue-400 via-indigo-300 to-violet-500',
-      };
-    }
-    return {
-      title: '全方位隙なしのスタイリッシュ・実力派',
-      subtitle: `キャリア・身体・生活水準の全要素が高水準で調和した洗練の実力派`,
-      rarityBadge: 'S ELITE',
-      rarityColor: 'from-cyan-400 via-blue-300 to-indigo-500',
-    };
-  }
-
-  // 🥈 3. A UPPER TIER (総合スコア 65 〜 74点)
-  if (overallScore >= 65) {
-    if (netWorth >= 1000 && totalDebts === 0) {
-      return {
-        title: '無傷の堅実型アセットビルダー',
-        subtitle: `無駄な負債を一切抱えず、盤石なキャッシュフローと純資産を積み上げる知恵者`,
-        rarityBadge: 'A UPPER',
-        rarityColor: 'from-emerald-400 via-green-300 to-teal-500',
-      };
-    }
-    if (iqScore >= 75 || academicScore >= 75) {
-      return {
-        title: '沈黙の隠れハイスペック',
-        subtitle: `鋭い分析力と高いIQを秘め、表舞台で確実な成果を叩き出すインテリジェンス派`,
-        rarityBadge: 'A UPPER',
-        rarityColor: 'from-teal-400 via-cyan-300 to-blue-500',
-      };
-    }
-    if (travelCount >= 3 || languagesCount >= 2) {
-      return {
-        title: '世界を視界に収めるアース・トラベラー',
-        subtitle: `多様な文化と視野を自分の糧にし、柔軟な思考で人生を切り開く自由人`,
-        rarityBadge: 'A UPPER',
-        rarityColor: 'from-sky-400 via-indigo-300 to-purple-500',
-      };
-    }
-    if (annualIncomeVal >= 600 && input.age <= 30) {
-      return {
-        title: '破竹の勢いで登り詰めるライジング・エース',
-        subtitle: `若くして同世代平均を大きく凌駕する年収と実績を誇る若手のエース`,
-        rarityBadge: 'A UPPER',
-        rarityColor: 'from-amber-400 via-yellow-300 to-orange-400',
-      };
-    }
-    return {
-      title: '親しみやすさ全振りの信頼エリート',
-      subtitle: `確かな実力と高い親和性を持ち、周囲からの信頼と愛される人間性を誇る実力者`,
-      rarityBadge: 'A UPPER',
-      rarityColor: 'from-violet-400 via-purple-300 to-indigo-500',
-    };
-  }
-
-  // 🥉 4. B & GROWING TIER (総合スコア 65点未満・詳細パターン展開)
-  if (input.age <= 24) {
-    return {
-      title: '覚醒を待つ未完のポテンシャル・ルーキー',
-      subtitle: `若き情熱と無限の伸びしろを内に秘め、これからの跳躍が最も期待される新星`,
-      rarityBadge: 'PROSPECT',
-      rarityColor: 'from-rose-400 via-pink-300 to-purple-500',
-    };
-  }
-
-  if (input.age <= 28) {
-    return {
-      title: '次世代を担うヤング・プレジデント候補',
-      subtitle: `圧倒的なエネルギーと行動力を武器に、将来の成功に向けてひた走る若き精鋭`,
-      rarityBadge: 'PROSPECT',
-      rarityColor: 'from-indigo-400 via-purple-300 to-pink-400',
-    };
-  }
-
-  if (netWorth >= 500) {
-    return {
-      title: '着実に芽吹くリッチ・パイオニア',
-      subtitle: `自力で着実に試練を乗り越え、確かな足場と資産を形作りつつある成長株`,
-      rarityBadge: 'GROWING',
-      rarityColor: 'from-amber-400 via-orange-300 to-rose-500',
-    };
-  }
-
-  if (totalDebts === 0) {
-    return {
-      title: '負債ゼロのクリーン＆スマート・サバイバー',
-      subtitle: `無理な借入をせず身の丈に合った健全な経営・生活を維持するスマートな実質派`,
-      rarityBadge: 'GROWING',
-      rarityColor: 'from-emerald-400 via-teal-300 to-cyan-400',
-    };
-  }
-
-  if (input.employmentType === 'SELF_EMPLOYED' || input.employmentType === 'FREELANCE') {
-    return {
-      title: '自由を切り開くインディペンデント・チャレンジャー',
-      subtitle: `組織に縛られず自らの腕とスキルでマーケットを切り開く自立したチャレンジャー`,
-      rarityBadge: 'CHALLENGER',
-      rarityColor: 'from-cyan-400 via-sky-300 to-blue-400',
-    };
-  }
-
-  if (input.employmentType === 'REGULAR') {
-    return {
-      title: '安定感バツグンのマイペース・プレイヤー',
-      subtitle: `確実な職場環境と一定の基盤の上で、着実に自らの生活とスキルを充実させる安定派`,
-      rarityBadge: 'GROWING',
-      rarityColor: 'from-blue-400 via-indigo-300 to-slate-300',
-    };
-  }
-
-  return {
-    title: '可能性無限大の進化系イノベーター',
-    subtitle: `独自の強みとポテンシャルを研ぎ澄まし、さらなる高みを目指して進化し続けるイノベーター`,
-    rarityBadge: 'CHALLENGER',
-    rarityColor: 'from-slate-400 via-indigo-300 to-slate-200',
-  };
+  return buildResult(OVERALL_TYPES[code], axes, OVERALL_TYPES[matchCode], tierBadge(overallScore));
 }
 
 /**
- * ユーザーの恋愛スペック診断結果に基づく「恋愛二つ名（称号・キャッチコピー）」動的生成エンジン (恋愛モード)
+ * 恋愛スペックのキャラタイプを判定する
  */
 export function generateLoveEpithetTitle(
   loveScore: number,
   input: DiagnosisInputV3,
-  metrics: MetricScoreResult[]
+  scores: LoveCategoryScores,
+  socialScore: number
 ): EpithetResult {
-  const isMale = input.gender !== 'FEMALE';
-  const faceMetric = metrics.find(m => m.metricCode === 'APPEARANCE');
-  const faceScore = faceMetric ? faceMetric.score : 50;
-  const incomeMetric = metrics.find(m => m.metricCode === 'ANNUAL_INCOME');
-  const incomeScore = incomeMetric ? incomeMetric.score : 50;
-  const companyMetric = metrics.find(m => m.metricCode === 'COMPANY');
-  const companyScore = companyMetric ? companyMetric.score : 50;
-  const academicMetric = metrics.find(m => m.metricCode === 'ACADEMIC_BACKGROUND');
-  const academicScore = academicMetric ? academicMetric.score : 50;
-  const iqMetric = metrics.find(m => m.metricCode === 'IQ_ESTIMATE');
-  const iqScore = iqMetric ? iqMetric.score : 50;
+  // 軸1: ビジュアル vs ステータス
+  const looks = (scores.face + scores.body) / 2;
+  const status = (scores.income + scores.career) / 2;
+  const visual = looks - 69 >= status - 76;
 
-  const luxuryVal = input.luxuryAssets !== undefined && input.luxuryAssets !== null
-    ? (input.luxuryAssets || 0)
-    : ((input.carAssets || 0) + (input.watchAssets || 0));
-  const totalAssets = (input.savingsAssets || 0) + (input.financialAssets || 0) + (input.realEstateAssets || 0) + luxuryVal;
-  const totalDebts = (input.mortgageDebt || 0) + (input.carDebt || 0) + (input.scholarshipDebt || 0) + (input.otherDebt || 0);
-  const heightVal = Number(input.height) || 0;
-
-  // 💖 1. SS GOD TIER (恋愛スコア 85点以上)
-  if (loveScore >= 85) {
-    if (faceScore >= 80 && (incomeScore >= 75 || companyScore >= 75)) {
-      return {
-        title: isMale ? '港区を狂わせるパーフェクト・パートナー' : '街を彩るビジュアル・モテクイーン',
-        subtitle: '圧倒的なビジュアルと洗練されたステータスを誇る、恋愛市場の最高峰ブランド',
-        rarityBadge: 'SS LOVE GOD',
-        rarityColor: 'from-rose-400 via-pink-200 to-amber-300',
-      };
-    }
-    if (incomeScore >= 80) {
-      return {
-        title: isMale ? '包容力溢れるハイスペ本命彼氏' : '全方位から愛される憧れの理想パートナー',
-        subtitle: '極めて高い経済力と生活水準を誇り、安心感と理想を兼ね備えた本命中の本命',
-        rarityBadge: 'SS LOVE GOD',
-        rarityColor: 'from-pink-400 via-rose-300 to-yellow-400',
-      };
-    }
-    if (faceScore >= 85) {
-      return {
-        title: '一瞬で恋に落とすルックス・カリスマ',
-        subtitle: '第一印象だけで周囲を魅了し、圧倒的な存在感と美意識で視線を独占するカリスマ',
-        rarityBadge: 'SS LOVE GOD',
-        rarityColor: 'from-fuchsia-400 via-rose-200 to-pink-500',
-      };
-    }
-    return {
-      title: isMale ? '令和の全方位モテキング' : '圧倒的美意識の全方位モテクイーン',
-      subtitle: 'ルックス・キャリア・ステータスの全てが高次元で噛み合った絶対的アイコン',
-      rarityBadge: 'SS LOVE GOD',
-      rarityColor: 'from-fuchsia-400 via-rose-300 to-amber-400',
-    };
+  // 軸2: 肉食 vs 草食（交際人数 → 経験人数 → MBTI E/I → SNS の順に判断）
+  let hunter: boolean;
+  const e = mbtiLetter(input, 0);
+  if (input.datingPartnerCount !== null && input.datingPartnerCount !== undefined) {
+    hunter = input.datingPartnerCount >= 4;
+  } else if (input.partnerCount !== null && input.partnerCount !== undefined) {
+    hunter = input.partnerCount >= 5;
+  } else if (e) {
+    hunter = e === 'E';
+  } else {
+    hunter = socialScore >= 52;
   }
 
-  // 🌸 2. S ELITE TIER (恋愛スコア 75 〜 84点)
-  if (loveScore >= 75) {
-    if (faceScore >= 75) {
-      return {
-        title: isMale ? '一目惚れを誘発するビジュアルスター' : '透明感溢れる恋のヒロイン',
-        subtitle: '第一印象で相手を惹きつける強い視線と清潔感を持ち、一瞬で魅了する華やかさ',
-        rarityBadge: 'S LOVE ELITE',
-        rarityColor: 'from-rose-400 via-pink-300 to-indigo-400',
-      };
-    }
-    if (incomeScore >= 70 || companyScore >= 70) {
-      return {
-        title: '結婚したい人気No.1の本命パートナー',
-        subtitle: '堅実なキャリアと安心できる生活基盤を備え、将来を共に歩みたくなる大本命',
-        rarityBadge: 'S LOVE ELITE',
-        rarityColor: 'from-pink-400 via-rose-300 to-purple-400',
-      };
-    }
-    if (heightVal >= 178) {
-      return {
-        title: 'スタイル抜群のスタイリッシュ・パートナー',
-        subtitle: '高身長・優れた体型バランスで服を着こなし、立ち姿だけで好印象を与える人気株',
-        rarityBadge: 'S LOVE ELITE',
-        rarityColor: 'from-purple-400 via-indigo-300 to-pink-400',
-      };
-    }
-    if (input.age >= 32) {
-      return {
-        title: '洗練された大人のモテ・アイコン',
-        subtitle: 'スマートな佇まいと確かなステータスで、大人の余裕を感じさせる上品なパートナー',
-        rarityBadge: 'S LOVE ELITE',
-        rarityColor: 'from-purple-400 via-pink-300 to-rose-400',
-      };
-    }
-    return {
-      title: '隙のないモテオーラを纏う実力派',
-      subtitle: 'ルックス・対話力・雰囲気の全てが好水準で調和した洗練のモテ・プレイヤー',
-      rarityBadge: 'S LOVE ELITE',
-      rarityColor: 'from-cyan-400 via-pink-300 to-purple-400',
-    };
+  // 軸3: フレッシュ vs 大人
+  const young = input.age <= 29;
+
+  // 軸4: ロマン vs 結婚（既婚・婚約 → MBTI T/F → 経済基盤の順に判断）
+  let marriage: boolean;
+  const tf = mbtiLetter(input, 2);
+  if (input.maritalStatus === 'MARRIED' || input.maritalStatus === 'ENGAGED_COHABITING' || (input.childrenCount || 0) > 0) {
+    marriage = true;
+  } else if (tf) {
+    marriage = tf === 'T';
+  } else {
+    marriage = status >= 76;
   }
 
-  // 🌿 3. A UPPER TIER (恋愛スコア 65 〜 74点)
-  if (loveScore >= 65) {
-    if (input.maritalStatus === 'SINGLE' || input.maritalStatus === 'SINGLE_FREE' || input.maritalStatus === 'SINGLE_DATING' || input.maritalStatus === 'ENGAGED_COHABITING') {
-      return {
-        title: 'ギャップで落とす沼らせマスター',
-        subtitle: '知れば知るほど味わい深い個性と魅力を秘め、相手を夢中にさせる恋愛の玄人',
-        rarityBadge: 'A LOVE UPPER',
-        rarityColor: 'from-fuchsia-400 via-pink-400 to-purple-500',
-      };
-    }
-    if (input.maritalStatus === 'MARRIED' || input.maritalStatus === 'SEPARATED' || input.maritalStatus === 'DIVORCED' || input.maritalStatus === 'BEREAVED') {
-      return {
-        title: '落ち着きと癒やしのプレミアム・パートナー',
-        subtitle: '相手を包み込む優しさと安定した日常生活を提供できる、心強い良きパートナー',
-        rarityBadge: 'A LOVE UPPER',
-        rarityColor: 'from-rose-400 via-pink-300 to-violet-400',
-      };
-    }
-    if (academicScore >= 75 || iqScore >= 75) {
-      return {
-        title: '知的な色気が香る大人デートのプロ',
-        subtitle: '豊富な話題と深い知性で会話を楽しませ、デートの満足度を最高まで引き上げる知性派',
-        rarityBadge: 'A LOVE UPPER',
-        rarityColor: 'from-teal-400 via-indigo-300 to-purple-400',
-      };
-    }
-    if (faceScore >= 65) {
-      return {
-        title: '清潔感あふれる好感度モンスター',
-        subtitle: '整った身だしなみと爽やかな笑顔で、初対面から誰にでも愛される万能な好印象型',
-        rarityBadge: 'A LOVE UPPER',
-        rarityColor: 'from-sky-400 via-pink-300 to-indigo-400',
-      };
-    }
-    return {
-      title: '一緒にいて安心する癒やし系ハイスペック',
-      subtitle: '安定感のある生活能力と飾らない人柄で、長続きする関係を築ける愛されキャラ',
-      rarityBadge: 'A LOVE UPPER',
-      rarityColor: 'from-rose-400 via-pink-300 to-violet-400',
-    };
-  }
+  const code = `${visual ? 'V' : 'S'}${hunter ? 'H' : 'P'}${young ? 'Y' : 'M'}${marriage ? 'K' : 'R'}`;
+  const axes: CharacterTypeAxis[] = [
+    { label: 'ビジュアル vs ステータス', result: visual ? 'ビジュアル' : 'ステータス', letter: code[0] },
+    { label: '肉食 vs 草食', result: hunter ? '肉食' : '草食', letter: code[1] },
+    { label: 'フレッシュ vs 大人', result: young ? 'フレッシュ' : '大人', letter: code[2] },
+    { label: 'ロマン vs 結婚', result: marriage ? '結婚' : 'ロマン', letter: code[3] },
+  ];
+  // 相性: ビジュアル/ステータス と 肉食/草食 が逆のタイプ
+  const matchCode = flipLetters(code, [0, 1], LOVE_PAIRS);
 
-  // 🌱 4. B & LOVE GROWING TIER (恋愛スコア 65点未満・詳細パターン展開)
-  if (input.age <= 24) {
-    return {
-      title: '磨けば光る恋のダイヤモンド原石',
-      subtitle: 'これからのスタイルアップと経験値で、劇的なモテ化を秘めたピュアな原石',
-      rarityBadge: 'LOVE PROSPECT',
-      rarityColor: 'from-pink-400 via-rose-300 to-slate-200',
-    };
-  }
-
-  if (input.age <= 28) {
-    return {
-      title: '伸びしろたっぷりの恋のピュア・ストライカー',
-      subtitle: '素直な心と若々しい情熱を持ち、これからの出会いで大きく花開く注目株',
-      rarityBadge: 'LOVE PROSPECT',
-      rarityColor: 'from-rose-400 via-pink-300 to-indigo-300',
-    };
-  }
-
-  if (totalDebts === 0) {
-    return {
-      title: '浮気リスク0%の超安心系パートナー',
-      subtitle: '相手を裏切らず、無理のない生活環境と揺るぎない誠実さで愛を育む純情派',
-      rarityBadge: 'LOVE GROWING',
-      rarityColor: 'from-emerald-400 via-teal-300 to-slate-200',
-    };
-  }
-
-  if ((input.mbti || '').includes('I')) {
-    return {
-      title: 'ディープな世界観を持つこだわり愛好家',
-      subtitle: '自分の趣味やこだわりを大切にし、波長の合うパートナーと深い絆を築くタイプ',
-      rarityBadge: 'LOVE GROWING',
-      rarityColor: 'from-purple-400 via-pink-300 to-slate-300',
-    };
-  }
-
-  if (faceScore <= 55) {
-    return {
-      title: '一途な愛を注ぎ続ける純情ロマンチスト',
-      subtitle: '見た目以上に誠実な内面と相手を思いやる気持ちに溢れた、深みのある愛されキャラ',
-      rarityBadge: 'LOVE CHALLENGER',
-      rarityColor: 'from-pink-300 via-rose-300 to-slate-300',
-    };
-  }
-
-  return {
-    title: 'ゆっくり愛を育む隠れ本命候補',
-    subtitle: '時間をかけてお互いを知ることで、かけがえのない絆と信頼を深めていく本命タイプ',
-    rarityBadge: 'LOVE CHALLENGER',
-    rarityColor: 'from-slate-400 via-pink-300 to-slate-200',
-  };
+  return buildResult(LOVE_TYPES[code], axes, LOVE_TYPES[matchCode], tierBadge(loveScore));
 }

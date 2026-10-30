@@ -96,7 +96,10 @@ export default function SnsShareCard({
     return 'C TIER';
   };
 
-  const epithetShareStr = displayEpithetTitle ? `\n二つ名：『${displayEpithetTitle}』` : '';
+  const typeShareStr = epithet?.typeCode
+    ? `\n${isLoveMode ? '恋愛タイプ' : 'タイプ'}：${epithet.typeEmoji ?? ''}${epithet.typeName}（${epithet.typeCode}）`
+    : '';
+  const epithetShareStr = displayEpithetTitle ? `${typeShareStr}\n二つ名：『${displayEpithetTitle}』` : '';
 
   const shareText = `【${modeTitle} 結果】
 ${profileHeaderStr} ${epithetShareStr}
@@ -447,6 +450,14 @@ ${rankShareStr} ${scoreLabel} ${score.toFixed(1)} / 100 pt
                   >
                     <span>{getTierText()}</span>
                   </div>
+
+                  {epithet?.typeCode && (
+                    <div className="text-[11px] font-black text-white leading-tight">
+                      <span className="text-base mr-1" aria-hidden>{epithet.typeEmoji}</span>
+                      <span className={`font-mono tracking-widest mr-1 ${isLoveMode ? 'text-rose-300' : 'text-amber-300'}`}>{epithet.typeCode}</span>
+                      {epithet.typeName}
+                    </div>
+                  )}
 
                   {/* Title with Gradient Text */}
                   <div

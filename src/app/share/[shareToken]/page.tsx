@@ -80,6 +80,13 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
         <div className="glass-surface rounded-3xl p-6 text-center mb-6 border-indigo-500/30 space-y-3">
           {data.epithet && (
             <div>
+              {data.epithet.typeCode && (
+                <div className="text-sm font-black text-white">
+                  <span className="text-2xl mr-1" aria-hidden>{data.epithet.typeEmoji}</span>
+                  <span className="font-mono tracking-widest text-amber-300 mr-1">{data.epithet.typeCode}</span>
+                  {data.epithet.typeName}
+                </div>
+              )}
               <div className={`text-2xl md:text-3xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r ${data.epithet.rarityColor} drop-shadow-sm pt-1`}>
                 『 {data.epithet.title} 』
               </div>
@@ -91,6 +98,13 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
           {data.loveEpithet && (
             <div className={data.epithet ? 'border-t border-slate-800/80 pt-3' : ''}>
               <div className="text-[10px] font-bold text-rose-400 mb-0.5">💖 恋愛二つ名</div>
+              {data.loveEpithet.typeCode && (
+                <div className="text-sm font-black text-white">
+                  <span className="text-2xl mr-1" aria-hidden>{data.loveEpithet.typeEmoji}</span>
+                  <span className="font-mono tracking-widest text-rose-300 mr-1">{data.loveEpithet.typeCode}</span>
+                  {data.loveEpithet.typeName}
+                </div>
+              )}
               <div className={`text-xl md:text-2xl font-black tracking-wide bg-clip-text text-transparent bg-gradient-to-r ${data.loveEpithet.rarityColor} drop-shadow-sm`}>
                 『 {data.loveEpithet.title} 』
               </div>
