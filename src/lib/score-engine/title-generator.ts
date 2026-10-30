@@ -64,7 +64,7 @@ export const LOVE_TYPES: Record<string, CharacterTypeDef> = {
   SHYK: { code: 'SHYK', name: '婚活エリート', emoji: '💍', title: '最短でゴールインする婚活エリート', subtitle: '若くして安定した基盤と行動力。結婚までの最短ルートを知っている、婚活市場の優等生', color: 'from-amber-300 via-yellow-200 to-pink-300' },
   SHMR: { code: 'SHMR', name: '港区の住人', emoji: '🍾', title: '港区を庭にするエスコート巧者', subtitle: 'お店選びも会話も完璧。ステータスと経験に裏打ちされたスマートなエスコートで魅せる大人', color: 'from-violet-400 via-purple-300 to-amber-300' },
   SHMK: { code: 'SHMK', name: '大黒柱', emoji: '🏰', title: '包容力MAXの頼れる大黒柱', subtitle: '経済力と決断力で、パートナーと家庭をまるごと支える。安心感なら誰にも負けないタイプ', color: 'from-emerald-300 via-teal-200 to-amber-300' },
-  SPYR: { code: 'SPYR', name: '文学青年', emoji: '📖', title: '隠れハイスペの文学系ロマンチスト', subtitle: '控えめだけど中身はハイスペ。好きな人のことを静かに想い続ける、知る人ぞ知るロマンチスト', color: 'from-indigo-300 via-sky-200 to-pink-300' },
+  SPYR: { code: 'SPYR', name: '隠れ優良物件', emoji: '🏠', title: 'まだ誰にも見つかっていない隠れ優良物件', subtitle: '控えめだけど中身はハイスペ。好きな人のことを静かに想い続ける、見つけた人だけが得をするロマンチスト', color: 'from-indigo-300 via-sky-200 to-pink-300' },
   SPYK: { code: 'SPYK', name: '安定株', emoji: '🌱', title: '堅実に育つ将来有望の安定株', subtitle: '派手さはないけど将来性はピカイチ。付き合うほど良さがわかる、結婚向きの堅実派', color: 'from-emerald-300 via-lime-200 to-teal-300' },
   SPMR: { code: 'SPMR', name: '沼系インテリ', emoji: '🎻', title: '知性で落とす沼系インテリ', subtitle: '会話の深さと大人の余裕で、気づいたら抜け出せない。じわじわハマらせる沼系タイプ', color: 'from-purple-400 via-indigo-300 to-teal-300' },
   SPMK: { code: 'SPMK', name: '不動の本命', emoji: '🗿', title: '何があっても揺るがない不動の本命', subtitle: '誠実さと生活力は折り紙付き。浮気も心変わりもなく、穏やかで安定した家庭を築ける最も信頼できるパートナー', color: 'from-teal-300 via-emerald-200 to-sky-300' },
