@@ -4,7 +4,7 @@ import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { PublicShareResult } from '@/types/spec-check';
 import { Sparkles, Heart, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
-import { scoreToTopPercent, formatRarityRatio } from '@/lib/score-engine/math-utils';
+import { scoreToTopPercent, scoreToDeviation, formatRarityRatio } from '@/lib/score-engine/math-utils';
 
 export default function SharePage({ params }: { params: Promise<{ shareToken: string }> }) {
   const { shareToken } = use(params);
@@ -123,8 +123,9 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
           <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-indigo-400 mb-2">
             <Sparkles className="w-4 h-4" /> 総合スペック
           </div>
-          <div className="text-5xl md:text-6xl font-black gradient-text-indigo mb-2">
-            {data.japanOverallScore} <span className="text-lg text-slate-400 font-normal">/100</span>
+          <div className="text-[11px] font-bold text-slate-400">偏差値</div>
+          <div className="text-5xl md:text-6xl font-black gradient-text-indigo mb-2 tabular-nums">
+            {scoreToDeviation(data.japanOverallScore).toFixed(1)}
           </div>
           <div className="mb-2">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-xs font-black">
@@ -140,8 +141,9 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
           <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-rose-400 mb-2">
             <Heart className="w-4 h-4 fill-rose-400" /> 恋愛スペック
           </div>
-          <div className="text-5xl md:text-6xl font-black gradient-text-pink mb-2">
-            {data.loveOverallScore} <span className="text-lg text-slate-400 font-normal">/100</span>
+          <div className="text-[11px] font-bold text-slate-400">偏差値</div>
+          <div className="text-5xl md:text-6xl font-black gradient-text-pink mb-2 tabular-nums">
+            {scoreToDeviation(data.loveOverallScore).toFixed(1)}
           </div>
           <div className="mb-2">
             <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-black">

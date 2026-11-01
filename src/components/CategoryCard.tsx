@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import DeviationCurve, { useRevealProgress } from '@/components/DeviationCurve';
+import { scoreToDeviation } from '@/lib/score-engine/math-utils';
 
 interface CategoryCardProps {
   labelJa: string;
@@ -14,53 +15,8 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ labelJa, labelEn, score, topPercent, colorTheme, isLocked = false, diagnosisId }: CategoryCardProps) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [displayScore, setDisplayScore] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-
-  useEffect(() => {
-    const element = cardRef.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting && !hasAnimated) {
-            setHasAnimated(true);
-          }
-        });
-      },
-      { threshold: 0.35, rootMargin: '0px 0px -80px 0px' }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [hasAnimated]);
-
-  useEffect(() => {
-    if (!hasAnimated) return;
-
-    let startTimestamp: number | null = null;
-    const duration = 1300; // 1.3s smooth count up animation
-
-    const step = (timestamp: number) => {
-      if (!startTimestamp) startTimestamp = timestamp;
-      const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-      const easedProgress = 1 - Math.pow(1 - progress, 4); // easeOutQuart
-      const current = easedProgress * score;
-      setDisplayScore(current);
-
-      if (progress < 1) {
-        window.requestAnimationFrame(step);
-      }
-    };
-
-    window.requestAnimationFrame(step);
-  }, [score, hasAnimated]);
-
-  const radius = 24;
-  const circumference = 2 * Math.PI * radius;
-  const progressOffset = circumference - (displayScore / 100) * circumference;
+  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(1300);
+  const deviation = scoreToDeviation(score);
 
   // 3-Tier Harmonious Color System:
   // - Elite / Top Tier (>= 85): Emerald Green (#10b981) - 最高峰・エリート達成
@@ -77,15 +33,6 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
     : colorTheme === 'rose'
     ? '#fb7185' // Rose Pink for Normal (<60)
     : '#818cf8'; // Indigo / Violet for Normal (<60)
-
-  // Dynamic glow drop shadow filter
-  const ringGlowClass = isElite
-    ? 'drop-shadow-[0_0_8px_rgba(16,185,129,0.55)]'
-    : isHigh
-    ? 'drop-shadow-[0_0_6px_rgba(56,189,248,0.45)]'
-    : colorTheme === 'rose'
-    ? 'drop-shadow-[0_0_6px_rgba(251,113,133,0.35)]'
-    : 'drop-shadow-[0_0_6px_rgba(129,140,248,0.35)]';
 
   // Text color for score value
   const scoreTextColor = isElite
@@ -136,33 +83,15 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
         </span>
       </div>
 
-      {/* Mini Donut Circle with Dynamic Glow: Shows actual score */}
-      <div className="relative w-16 h-16 flex items-center justify-center mb-2">
-        <svg className="w-full h-full -rotate-90 transform overflow-visible" viewBox="0 0 60 60">
-          <circle
-            cx="30"
-            cy="30"
-            r={radius}
-            stroke="rgba(255, 255, 255, 0.08)"
-            strokeWidth="5"
-            fill="none"
-          />
-          <circle
-            cx="30"
-            cy="30"
-            r={radius}
-            stroke={strokeColor}
-            strokeWidth="5"
-            strokeDasharray={circumference}
-            strokeDashoffset={progressOffset}
-            strokeLinecap="round"
-            fill="none"
-            className={`filter ${ringGlowClass}`}
-          />
-        </svg>
-        <span className={`absolute text-sm sm:text-base ${scoreTextColor} tracking-tight font-black`}>
-          {Math.round(displayScore * 10) / 10}
+      {/* 偏差値 ＋ ミニ正規分布（あなたの位置） */}
+      <div className="w-full flex flex-col items-center mb-1">
+        <span className="text-[9px] font-extrabold text-slate-400 tracking-wider">偏差値</span>
+        <span className={`text-2xl leading-none tracking-tight tabular-nums ${scoreTextColor}`}>
+          {(deviation * progress).toFixed(1)}
         </span>
+        <div className="w-full max-w-[112px] mt-2">
+          <DeviationCurve deviation={50 + (deviation - 50) * progress} color={strokeColor} size="sm" />
+        </div>
       </div>
 
       {/* Top Percent Badge (Locked vs Unlocked) */}
