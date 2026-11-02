@@ -3,7 +3,7 @@
 import { use, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { OverallDiagnosisResultV3 } from '@/types/spec-check';
-import ScoreRing from '@/components/ScoreRing';
+import DeviationHero from '@/components/DeviationHero';
 import RadarChart from '@/components/RadarChart';
 import CategoryCard from '@/components/CategoryCard';
 import SpecRankings from '@/components/SpecRankings';
@@ -13,7 +13,7 @@ import PremiumReportSection from '@/components/PremiumReportSection';
 import AffiliateRecommendations from '@/components/AffiliateRecommendations';
 import { Sparkles, Heart, ShieldCheck, ArrowLeft, AlertCircle, RotateCcw, FileText, ChevronRight, CheckCircle2, Unlock } from 'lucide-react';
 import { runDiagnosisV3 } from '@/lib/score-engine';
-import { scoreToTopPercent, formatRarityRatio } from '@/lib/score-engine/math-utils';
+import { scoreToTopPercent, scoreToDeviation, formatRarityRatio } from '@/lib/score-engine/math-utils';
 import { getMbtiEconomicEvaluationText, getMbtiLoveEvaluationText } from '@/lib/score-engine/mbti';
 import { getExperienceEvaluationText } from '@/lib/score-engine/experience';
 
@@ -431,71 +431,52 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
-      {/* ① メインスコアリング表示 */}
+      {/* ① メイン表示：偏差値 ＋ 正規分布上の位置 */}
       <section className="glass-surface glass-surface-glow rounded-3xl p-5 sm:p-6 md:p-8 mb-6 md:mb-8 border border-slate-800">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 md:gap-8">
-          <div className="flex-1">
-            {/* メイン見出し */}
-            <div className="mb-2 sm:mb-3">
-              <h2 className="text-white text-base sm:text-lg md:text-xl font-black tracking-wide leading-snug">
-                <span className="inline-block mr-1.5">{data.inputSummary.nickname || 'あなた'} / {data.inputSummary.age}歳 / {genderTextJa} / {data.inputSummary.prefectureName} の</span>
-                <span className="inline-block">{isLoveMode ? '恋愛スペック診断結果' : '人間スペック診断結果'}</span>
-              </h2>
+        <h2 className="text-white text-base sm:text-lg md:text-xl font-black tracking-wide leading-snug text-center mb-4 sm:mb-5">
+          <span className="inline-block mr-1.5">{data.inputSummary.nickname || 'あなた'} / {data.inputSummary.age}歳 / {genderTextJa} / {data.inputSummary.prefectureName} の</span>
+          <span className="inline-block">{isLoveMode ? '恋愛スペック診断結果' : '人間スペック診断結果'}</span>
+        </h2>
+
+        <DeviationHero
+          key={activeTab}
+          score={overallScore}
+          topPercent={topOverallPercent}
+          label={isLoveMode ? '恋愛偏差値' : '人間スペック偏差値'}
+          populationText={`同世代（${data.inputSummary.age}歳・${data.inputSummary.prefectureName}）の${genderTextJa}の中で`}
+          suffixText={isLoveMode ? 'の恋愛市場価値' : 'の総合スペック'}
+          colorTheme={isLoveMode ? 'rose' : 'violet'}
+        />
+
+        <div className="mt-4 flex flex-col items-center gap-2">
+          {/* 希少度比率バッジ (10万人に1人 / 100万人に1人等) */}
+          <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide border shadow-md transition-all ${
+            topOverallPercent <= 0.001
+              ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-amber-500/20 animate-pulse'
+              : topOverallPercent <= 0.01
+              ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-amber-500/10'
+              : topOverallPercent <= 0.1
+              ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
+              : topOverallPercent <= 1.0
+              ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
+              : 'bg-slate-800/80 text-slate-300 border-slate-700/60'
+          }`}>
+            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+            <span>同世代の <strong className="text-white font-black text-sm sm:text-base underline decoration-amber-400/60 decoration-2 underline-offset-2">{formatRarityRatio(topOverallPercent)}</strong> の逸材</span>
+          </span>
+
+          {/* 全国比較併記バッジ */}
+          {nationwideScore !== null && nationwideTopPercent !== null && (
+            <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-bold text-slate-300 shadow-inner">
+              <span className="text-slate-400">🇯🇵 全国の同世代ベース:</span>
+              <span className="text-emerald-400 font-black">
+                偏差値 {scoreToDeviation(nationwideScore).toFixed(1)}・上位 {nationwideTopPercent}%
+              </span>
+              <span className="text-emerald-300/90 font-bold text-[10px]">
+                ({formatRarityRatio(nationwideTopPercent)})
+              </span>
             </div>
-
-            {/* 恋愛市場価値： 上位 XX% (中央寄せ - 常時上位%表示 & 希少度比率) */}
-            <div className="text-center my-2 sm:my-3">
-              <div className="text-slate-200 text-sm sm:text-base md:text-lg font-extrabold mb-0.5">
-                {isLoveMode ? '恋愛市場価値' : '総合評価'} :
-              </div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
-                <span className="whitespace-nowrap">
-                  上位 <span className={isLoveMode ? 'gradient-text-pink text-4xl sm:text-5xl md:text-6xl font-black' : 'gradient-text-indigo text-4xl sm:text-5xl md:text-6xl font-black'}>{topOverallPercent}%</span>
-                </span>
-              </h1>
-
-              {/* 希少度比率バッジ (10万人に1人 / 100万人に1人等) */}
-              <div className="mt-2.5 flex items-center justify-center gap-2 flex-wrap">
-                <span className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black tracking-wide border shadow-md transition-all ${
-                  topOverallPercent <= 0.001
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/50 shadow-amber-500/20 animate-pulse'
-                    : topOverallPercent <= 0.01
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-amber-500/10'
-                    : topOverallPercent <= 0.1
-                    ? 'bg-purple-500/20 text-purple-300 border-purple-500/40'
-                    : topOverallPercent <= 1.0
-                    ? 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30'
-                    : 'bg-slate-800/80 text-slate-300 border-slate-700/60'
-                }`}>
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-                  <span>同世代の <strong className="text-white font-black text-sm sm:text-base underline decoration-amber-400/60 decoration-2 underline-offset-2">{formatRarityRatio(topOverallPercent)}</strong> の逸材</span>
-                </span>
-              </div>
-
-              {/* 全国比較併記バッジ (常時上位%表示) */}
-              {nationwideTopPercent !== null && (
-                <div className="mt-2 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-bold text-slate-300 shadow-inner">
-                  <span className="text-slate-400">🇯🇵 全国の同世代ベース:</span>
-                  <span className="text-emerald-400 font-black">
-                    上位 {nationwideTopPercent}%
-                  </span>
-                  <span className="text-emerald-300/90 font-bold text-[10px]">
-                    ({formatRarityRatio(nationwideTopPercent)})
-                  </span>
-                  <span className="text-slate-500 text-[10px]">({nationwideScore} POINT)</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="w-full md:w-auto flex justify-center py-1">
-            <ScoreRing
-              score={overallScore}
-              label={isLoveMode ? '恋愛スペック' : '総合スペック'}
-              subLabel="/ 100 POINT"
-              colorTheme={isLoveMode ? 'rose' : 'violet'}
-            />
-          </div>
+          )}
         </div>
       </section>
 

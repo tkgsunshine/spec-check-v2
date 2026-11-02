@@ -71,6 +71,22 @@ export function scoreToTopPercent(score: number): number {
 }
 
 /**
+ * 総合・カテゴリスコア (0〜100, 平均50 / σ=9.88) を偏差値 (平均50 / σ=10) に換算する。
+ * scoreToTopPercent と同じ分布モデルを使うので、表示する偏差値と上位%は常に整合する。
+ */
+export function scoreToDeviation(score: number): number {
+  if (!Number.isFinite(score)) return 50;
+  const z = (score - 50.0) / 9.88;
+  const deviation = 50 + 10 * z;
+  return Math.round(Math.max(0, Math.min(100, deviation)) * 10) / 10;
+}
+
+/** 標準正規分布の確率密度 */
+export function normalPDF(z: number): number {
+  return Math.exp(-(z * z) / 2) / Math.sqrt(2 * Math.PI);
+}
+
+/**
  * 上位パーセント (topPercent) から「○人に1人」「○万人に1人」「100万人に1人」の希少度比率を算出
  */
 export function formatRarityRatio(topPercent: number | null | undefined): string {

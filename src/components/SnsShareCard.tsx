@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Share2, Check, Copy, ExternalLink, X, Download, Heart, Sparkles } from 'lucide-react';
 import { MetricScoreResult, EpithetResult } from '@/types/spec-check';
-import { formatRarityRatio } from '@/lib/score-engine/math-utils';
+import { formatRarityRatio, scoreToDeviation } from '@/lib/score-engine/math-utils';
 
 interface RadarAxis {
   labelJa: string;
@@ -72,7 +72,8 @@ export default function SnsShareCard({
   const displayNickname = nickname || 'あなた';
   const prefStr = prefectureName ? ` / ${prefectureName}` : '';
   const modeTitle = isLoveMode ? '恋愛スペック診断' : '人間スペック診断';
-  const scoreLabel = isLoveMode ? '恋愛市場価値' : '総合評価';
+  const deviationLabel = isLoveMode ? '恋愛偏差値' : '人間スペック偏差値';
+  const deviation = scoreToDeviation(score);
   const profileHeaderStr = `${displayNickname} / ${age}歳 / ${genderTextJa}${prefStr} の${modeTitle}結果`;
 
   const rankShareStr = (topPercent !== undefined && topPercent !== null && topPercent <= 50)
@@ -103,7 +104,7 @@ export default function SnsShareCard({
 
   const shareText = `【${modeTitle} 結果】
 ${profileHeaderStr} ${epithetShareStr}
-${rankShareStr} ${scoreLabel} ${score.toFixed(1)} / 100 pt
+${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
 あなたの同世代${isLoveMode ? '恋愛偏差値＆市場価値' : '順位＆市場価値'}は？
 #${modeTitle} #${isLoveMode ? '恋愛市場価値' : '人間スペック'} #スペック診断 #同世代比較`;
 
@@ -236,11 +237,11 @@ ${rankShareStr} ${scoreLabel} ${score.toFixed(1)} / 100 pt
       const scoreY = displayEpithetTitle ? currentY + 30 : 160;
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 64px sans-serif';
-      ctx.fillText(score.toFixed(1), width / 2, scoreY);
+      ctx.fillText(deviation.toFixed(1), width / 2, scoreY);
 
       ctx.fillStyle = isLoveMode ? '#f472b6' : '#94a3b8';
       ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(`/ 100 POINT（${scoreLabel}）`, width / 2, scoreY + 28);
+      ctx.fillText(`${deviationLabel}（平均50）`, width / 2, scoreY + 28);
 
       // TOP % Pill
       if (topPercent !== undefined && topPercent !== null && topPercent <= 50) {
@@ -492,14 +493,14 @@ ${rankShareStr} ${scoreLabel} ${score.toFixed(1)} / 100 pt
                     : 'text-white'
                 }`}
               >
-                {score.toFixed(1)}
+                {deviation.toFixed(1)}
               </div>
               <div
                 className={`text-[10px] font-semibold mb-2 ${
                   isLoveMode ? 'text-rose-300/80' : 'text-slate-400'
                 }`}
               >
-                / 100 POINT（{scoreLabel}）
+                {deviationLabel}（平均50）
               </div>
 
               {topPercent !== undefined && topPercent !== null && topPercent <= 30 && (

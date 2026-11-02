@@ -101,3 +101,24 @@ describe('Score Engine V3.0 Unit Tests', () => {
     expect(result.metrics.some(m => m.metricCode === 'TRAVEL')).toBe(true);
   });
 });
+
+describe('scoreToDeviation', () => {
+  it('平均スコア50は偏差値50', async () => {
+    const { scoreToDeviation } = await import('../src/lib/score-engine/math-utils');
+    expect(scoreToDeviation(50)).toBe(50);
+  });
+
+  it('上位%と同じ分布モデルで換算する（偏差値60 ≒ 上位15.9%）', async () => {
+    const { scoreToDeviation, scoreToTopPercent } = await import('../src/lib/score-engine/math-utils');
+    const score = 50 + 9.88; // +1σ
+    expect(scoreToDeviation(score)).toBe(60);
+    expect(scoreToTopPercent(score)).toBeCloseTo(15.9, 1);
+  });
+
+  it('0〜100に収め、小数1桁に丸める', async () => {
+    const { scoreToDeviation } = await import('../src/lib/score-engine/math-utils');
+    expect(scoreToDeviation(0)).toBeGreaterThanOrEqual(0);
+    expect(scoreToDeviation(100)).toBeLessThanOrEqual(100);
+    expect(scoreToDeviation(63.37)).toBe(Math.round(scoreToDeviation(63.37) * 10) / 10);
+  });
+});
