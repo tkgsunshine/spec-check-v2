@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import DeviationCurve, { animatedDeviation, useRevealProgress } from '@/components/DeviationCurve';
 import { scoreToDeviation } from '@/lib/score-engine/math-utils';
+import { LockIcon } from '@/components/icons/SpecIcons';
 
 interface CategoryCardProps {
   labelJa: string;
@@ -103,7 +104,7 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
             <span className="text-xs sm:text-sm font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-amber-300 tracking-tight">
               ??%
             </span>
-            <span className="text-xs text-amber-300 animate-pulse ml-0.5">🔒</span>
+            <LockIcon className="w-3 h-3 text-amber-300 animate-pulse ml-0.5" />
           </div>
           <span className="text-[9px] font-extrabold text-purple-300 group-hover:text-amber-300 transition-colors tracking-tight mt-0.5">
             タップでアンロック

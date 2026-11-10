@@ -16,6 +16,8 @@ import { runDiagnosisV3 } from '@/lib/score-engine';
 import { scoreToTopPercent, scoreToDeviation, formatRarityRatio } from '@/lib/score-engine/math-utils';
 import { getMbtiEconomicEvaluationText, getMbtiLoveEvaluationText } from '@/lib/score-engine/mbti';
 import { getExperienceEvaluationText } from '@/lib/score-engine/experience';
+import TypeIcon from '@/components/icons/TypeIcon';
+import { JapanIcon, LockIcon, PointRightIcon } from '@/components/icons/SpecIcons';
 
 function generateOverallEvaluationText(params: {
   isLoveMode: boolean;
@@ -336,7 +338,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           <span className={`text-xs sm:text-sm font-black flex items-center gap-1.5 transition-all ${
             isLoveMode ? 'text-indigo-300 group-hover:text-indigo-200' : 'text-pink-300 group-hover:text-pink-200'
           }`}>
-            <span>👉</span>
+            <PointRightIcon className="w-4 h-4" />
             <span className="underline underline-offset-4 decoration-current">{isLoveMode ? '総合スペックを確認する' : '恋愛スペックを確認する'}</span>
           </span>
         </div>
@@ -388,7 +390,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
 
           {currentEpithet.typeCode && (
             <div className="mb-1">
-              <div className="text-5xl sm:text-6xl leading-none mb-2 drop-shadow-lg" aria-hidden>{currentEpithet.typeEmoji}</div>
+              <div className="mb-2 flex justify-center drop-shadow-lg"><TypeIcon code={currentEpithet.typeCode} color={currentEpithet.rarityColor} size={72} /></div>
               <div className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-wide">
                 {isLoveMode ? 'あなたの恋愛タイプ' : 'あなたのスペックタイプ'}
               </div>
@@ -423,7 +425,8 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
             <div className="mt-3 text-xs sm:text-sm text-slate-300">
               相性◎のタイプ：
               <span className="font-black text-white">
-                {currentEpithet.bestMatch.emoji} {currentEpithet.bestMatch.name}
+                <TypeIcon code={currentEpithet.bestMatch.code} size={22} className="mr-1 align-[-0.35em]" />
+                {currentEpithet.bestMatch.name}
                 <span className="font-mono text-amber-300 ml-1">（{currentEpithet.bestMatch.code}）</span>
               </span>
             </div>
@@ -468,7 +471,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           {/* 全国比較併記バッジ */}
           {nationwideScore !== null && nationwideTopPercent !== null && (
             <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-bold text-slate-300 shadow-inner">
-              <span className="text-slate-400">🇯🇵 全国の同世代ベース:</span>
+              <span className="text-slate-400 inline-flex items-center gap-1"><JapanIcon className="w-4 h-4" /> 全国の同世代ベース:</span>
               <span className="text-emerald-400 font-black">
                 偏差値 {scoreToDeviation(nationwideScore).toFixed(1)}・上位 {nationwideTopPercent}%
               </span>
@@ -512,7 +515,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
             <span className={`text-xs sm:text-sm font-black flex items-center gap-1.5 transition-all ${
               isLoveMode ? 'text-indigo-300 group-hover:text-indigo-200' : 'text-pink-300 group-hover:text-pink-200'
             }`}>
-              <span>👉</span>
+              <PointRightIcon className="w-4 h-4" />
               <span className="underline underline-offset-4 decoration-current">{isLoveMode ? '総合スペックを確認する' : '恋愛スペックを確認する'}</span>
             </span>
           </div>
@@ -571,7 +574,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                     </span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 inline-flex items-center gap-1">
-                        🔒 プレミアム限定
+                        <LockIcon className="w-3 h-3" /> プレミアム限定
                       </span>
                     )}
                   </h2>
@@ -622,7 +625,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                         <span className="whitespace-nowrap">{isLoveMode ? '恋愛スペック診断 総評' : '総合スペック診断 総評'}</span>
                         {!isUnlocked && (
                           <span className="whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                            🔒 冒頭プレビュー中
+                            <LockIcon className="w-3 h-3 inline-block mr-0.5" />冒頭プレビュー中
                           </span>
                         )}
                       </h3>

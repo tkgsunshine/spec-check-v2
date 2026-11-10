@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import "./globals.css";
+import { ChartIcon } from '@/components/icons/SpecIcons';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -128,7 +129,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 コラム
               </Link>
               <span className="hidden sm:inline text-[10px] md:text-xs font-extrabold text-slate-300 px-3 py-1 rounded-full bg-slate-900/90 border border-slate-800 shadow-inner">
-                📊 政府公式統計データ連動
+                <ChartIcon className="w-3.5 h-3.5 mr-1" />政府公式統計データ連動
               </span>
             </div>
           </div>

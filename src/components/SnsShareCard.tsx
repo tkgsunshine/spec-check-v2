@@ -5,6 +5,7 @@ import { Check, Copy, X, Download, Heart, Sparkles } from 'lucide-react';
 import { EpithetResult } from '@/types/spec-check';
 import DeviationCurve from '@/components/DeviationCurve';
 import { formatRarityRatio, normalPDF, scoreToDeviation } from '@/lib/score-engine/math-utils';
+import TypeIcon from '@/components/icons/TypeIcon';
 
 interface RadarAxis {
   labelJa: string;
@@ -85,7 +86,7 @@ export default function SnsShareCard({
   };
 
   const typeShareStr = epithet?.typeCode
-    ? `\n${isLoveMode ? '恋愛タイプ' : 'タイプ'}：${epithet.typeEmoji ?? ''}${epithet.typeName}（${epithet.typeCode}）`
+    ? `\n${isLoveMode ? '恋愛タイプ' : 'タイプ'}：${epithet.typeName}（${epithet.typeCode}）`
     : '';
   const epithetShareStr = displayEpithetTitle ? `${typeShareStr}\n二つ名：『${displayEpithetTitle}』` : '';
 
@@ -153,7 +154,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
       ctx.textAlign = 'center';
       ctx.fillStyle = isLoveMode ? '#f472b6' : '#818cf8';
       ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(`${isLoveMode ? '💖 恋愛スペック診断' : '⚡ 人間スペック診断'} 公式カード`, width / 2, 50);
+      ctx.fillText(`${isLoveMode ? '恋愛スペック診断' : '人間スペック診断'} 公式カード`, width / 2, 50);
 
       // User Profile Header
       ctx.fillStyle = '#ffffff';
@@ -448,7 +449,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
 
                   {epithet?.typeCode && (
                     <div className="text-[11px] font-black text-white leading-tight">
-                      <span className="text-base mr-1" aria-hidden>{epithet.typeEmoji}</span>
+                      <TypeIcon code={epithet.typeCode} color={epithet.rarityColor} size={22} className="mr-1 align-middle" />
                       <span className={`font-mono tracking-widest mr-1 ${isLoveMode ? 'text-rose-300' : 'text-amber-300'}`}>{epithet.typeCode}</span>
                       {epithet.typeName}
                     </div>

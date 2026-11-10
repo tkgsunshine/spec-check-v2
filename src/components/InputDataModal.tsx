@@ -18,6 +18,7 @@ import { sanitizeNumericInput } from '@/lib/score-engine/math-utils';
 import { X, FileText, User, Landmark, GraduationCap, Globe, Sparkles, ChevronRight, Plus, Trash2 } from 'lucide-react';
 import UniversityAutocomplete from '@/components/UniversityAutocomplete';
 import CompanyAutocomplete from '@/components/CompanyAutocomplete';
+import { WarningIcon } from '@/components/icons/SpecIcons';
 
 interface InputDataModalProps {
   input: DiagnosisInputV3;
@@ -308,7 +309,7 @@ export default function InputDataModal({ input, activeTab }: InputDataModalProps
             {/* エラーメッセージ */}
             {errorMsg && (
               <div className="px-5 py-3 bg-rose-500/20 border-b border-rose-500/30 text-rose-300 text-xs font-bold shrink-0 flex items-center gap-2">
-                ⚠️ {errorMsg}
+                <WarningIcon className="w-4 h-4 mr-1" />{errorMsg}
               </div>
             )}
 

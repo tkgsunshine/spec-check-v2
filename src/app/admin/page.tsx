@@ -16,6 +16,7 @@ import {
   SNS_FOLLOWER_BRACKETS,
   LANGUAGE_MASTER,
 } from '@/lib/datasets/japan-stats';
+import { CardIcon, GemIcon, StatusDot } from '@/components/icons/SpecIcons';
 
 interface AdminStatsSummary {
   totalCount: number;
@@ -257,7 +258,7 @@ export default function AdminPage() {
                 ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_10px_rgba(16,185,129,0.2)]'
                 : 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_10px_rgba(245,158,11,0.2)]'
             }`}>
-              {adminEnv.environment === 'production' ? '🟢 本番環境 (diagnoses)' : '🟡 ローカル開発環境 (dev_diagnoses)'}
+              {adminEnv.environment === 'production' ? <><StatusDot color="#22c55e" className="mr-1.5" />本番環境 (diagnoses)</> : <><StatusDot color="#eab308" className="mr-1.5" />ローカル開発環境 (dev_diagnoses)</>}
             </span>
           </div>
         </div>
@@ -619,7 +620,7 @@ export default function AdminPage() {
                   {/* 資産内訳 4項目 */}
                   <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-1.5">
                     <span className="text-[11px] font-extrabold text-emerald-400 block border-b border-slate-800 pb-1">
-                      💎 保有資産 内訳
+                      <GemIcon className="w-4 h-4 mr-1" />保有資産 内訳
                     </span>
                     <div className="flex justify-between">
                       <span className="text-slate-400">1. 預金:</span>
@@ -647,7 +648,7 @@ export default function AdminPage() {
                   {/* 負債内訳 4項目 */}
                   <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800 space-y-1.5 sm:col-span-2">
                     <span className="text-[11px] font-extrabold text-rose-400 block border-b border-slate-800 pb-1">
-                      💳 負債・借入 内訳
+                      <CardIcon className="w-4 h-4 mr-1" />負債・借入 内訳
                     </span>
                     <div className="grid grid-cols-2 gap-2">
                       <div className="flex justify-between">
