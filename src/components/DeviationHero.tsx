@@ -1,6 +1,6 @@
 'use client';
 
-import DeviationCurve, { useRevealProgress } from '@/components/DeviationCurve';
+import DeviationCurve, { animatedDeviation, useRevealProgress } from '@/components/DeviationCurve';
 import { scoreToDeviation } from '@/lib/score-engine/math-utils';
 
 interface DeviationHeroProps {
@@ -25,15 +25,15 @@ export default function DeviationHero({
   colorTheme = 'violet',
 }: DeviationHeroProps) {
   const deviation = scoreToDeviation(score);
-  const { ref, progress } = useRevealProgress<HTMLDivElement>(1400);
+  const { ref, progress } = useRevealProgress<HTMLDivElement>(4000);
 
   const isRose = colorTheme === 'rose';
   const accent = isRose ? '#fb7185' : '#818cf8';
   const numberClass = isRose ? 'gradient-text-pink' : 'gradient-text-indigo';
   const highlightClass = isRose ? 'text-rose-300' : 'text-indigo-300';
 
-  const shownNumber = deviation * progress;
-  const shownMarker = 50 + (deviation - 50) * progress;
+  // 数字と「あなた」マーカーは同じ値で、分布図の左端（偏差値20）からゆっくり上がる
+  const shownDeviation = animatedDeviation(deviation, progress);
 
   return (
     <div ref={ref} className="w-full max-w-md mx-auto text-center">
@@ -43,7 +43,7 @@ export default function DeviationHero({
         className={`${numberClass} font-black tracking-tight leading-none mt-1 text-7xl sm:text-8xl tabular-nums`}
         aria-label={`${label} ${deviation.toFixed(1)}`}
       >
-        {shownNumber.toFixed(1)}
+        {shownDeviation.toFixed(1)}
       </div>
 
       <p className="mt-3 text-[13px] sm:text-sm font-bold text-slate-200 leading-relaxed">
@@ -53,7 +53,7 @@ export default function DeviationHero({
       </p>
 
       <div className="mt-4 px-1 sm:px-4">
-        <DeviationCurve deviation={shownMarker} color={accent} size="lg" />
+        <DeviationCurve deviation={shownDeviation} color={accent} size="lg" />
       </div>
 
       <p className="mt-1 text-[10px] sm:text-[11px] font-semibold text-slate-500">

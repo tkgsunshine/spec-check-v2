@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import DeviationCurve, { useRevealProgress } from '@/components/DeviationCurve';
+import DeviationCurve, { animatedDeviation, useRevealProgress } from '@/components/DeviationCurve';
 import { scoreToDeviation } from '@/lib/score-engine/math-utils';
 
 interface CategoryCardProps {
@@ -15,7 +15,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ labelJa, labelEn, score, topPercent, colorTheme, isLocked = false, diagnosisId }: CategoryCardProps) {
-  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(1300);
+  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(3000);
   const deviation = scoreToDeviation(score);
 
   // 3-Tier Harmonious Color System:
@@ -87,10 +87,10 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
       <div className="w-full flex flex-col items-center mb-1">
         <span className="text-[9px] font-extrabold text-slate-400 tracking-wider">偏差値</span>
         <span className={`text-2xl leading-none tracking-tight tabular-nums ${scoreTextColor}`}>
-          {(deviation * progress).toFixed(1)}
+          {animatedDeviation(deviation, progress).toFixed(1)}
         </span>
         <div className="w-full max-w-[112px] mt-2">
-          <DeviationCurve deviation={50 + (deviation - 50) * progress} color={strokeColor} size="sm" />
+          <DeviationCurve deviation={animatedDeviation(deviation, progress)} color={strokeColor} size="sm" />
         </div>
       </div>
 
