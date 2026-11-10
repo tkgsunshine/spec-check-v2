@@ -60,7 +60,6 @@ export default function DeviationHero({
       <p className="mt-1 text-[10px] sm:text-[11px] font-semibold text-slate-500">
         平均偏差値50を基準とした正規分布上のあなたの位置
       </p>
-      <p className="text-[10px] font-semibold text-slate-600">スコア {score.toFixed(1)} / 100pt</p>
     </div>
   );
 }
