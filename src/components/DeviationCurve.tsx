@@ -7,9 +7,9 @@ import { normalPDF } from '@/lib/score-engine/math-utils';
  * 画面に入ったら 0→1 へ進む進捗値を返す。
  * 偏差値の数字のカウントアップと、分布図上の「あなた」マーカーの移動を同期させるために使う。
  * 「どこまで上がるんだ！？」というドキドキ感を出すため、しっかり画面に入ってから少し間を置いて始め、
- * easeOutQuint で終盤ほど大きく減速させる。
+ * 後半に長い「溜め」を作る（suspenseEase 参照）。
  */
-export function useRevealProgress<T extends Element>(duration = 4000, delay = 350) {
+export function useRevealProgress<T extends Element>(duration = 7000, delay = 350) {
   const ref = useRef<T>(null);
   const [started, setStarted] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -34,7 +34,7 @@ export function useRevealProgress<T extends Element>(duration = 4000, delay = 35
     const step = (ts: number) => {
       if (startTs === null) startTs = ts;
       const t = Math.min((ts - startTs) / duration, 1);
-      setProgress(1 - Math.pow(1 - t, 5));
+      setProgress(suspenseEase(t));
       if (t < 1) raf = window.requestAnimationFrame(step);
     };
     const timer = window.setTimeout(() => {
@@ -47,6 +47,21 @@ export function useRevealProgress<T extends Element>(duration = 4000, delay = 35
   }, [started, duration, delay]);
 
   return { ref, progress };
+}
+
+// 前半 RUSH_TIME の時間で RUSH_PROGRESS まで一定速度で駆け上がり、
+// 残りの長い時間で速度を落としながらじわじわ本来の値に近づく（つなぎ目で速度は連続）。
+const RUSH_TIME = 0.25;
+const RUSH_PROGRESS = 0.4;
+
+export function suspenseEase(t: number) {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  if (t < RUSH_TIME) return (RUSH_PROGRESS * t) / RUSH_TIME;
+  const u = (t - RUSH_TIME) / (1 - RUSH_TIME);
+  // 後半の減速の強さ。前半の速度とつなぎ目で一致させる
+  const n = (RUSH_PROGRESS / RUSH_TIME) * (1 - RUSH_TIME) / (1 - RUSH_PROGRESS);
+  return RUSH_PROGRESS + (1 - RUSH_PROGRESS) * (1 - Math.pow(1 - u, n));
 }
 
 /** アニメーション中に表示する偏差値。分布図の左端（偏差値20）から本来の値まで上がる。 */

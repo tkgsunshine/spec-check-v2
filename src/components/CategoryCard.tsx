@@ -15,7 +15,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ labelJa, labelEn, score, topPercent, colorTheme, isLocked = false, diagnosisId }: CategoryCardProps) {
-  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(3000);
+  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(5000);
   const deviation = scoreToDeviation(score);
 
   // 3-Tier Harmonious Color System:

@@ -25,7 +25,7 @@ export default function DeviationHero({
   colorTheme = 'violet',
 }: DeviationHeroProps) {
   const deviation = scoreToDeviation(score);
-  const { ref, progress } = useRevealProgress<HTMLDivElement>(4000);
+  const { ref, progress } = useRevealProgress<HTMLDivElement>(7000);
 
   const isRose = colorTheme === 'rose';
   const accent = isRose ? '#fb7185' : '#818cf8';
