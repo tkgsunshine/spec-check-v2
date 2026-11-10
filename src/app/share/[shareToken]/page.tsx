@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { PublicShareResult } from '@/types/spec-check';
 import { Sparkles, Heart, ShieldCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { scoreToTopPercent, scoreToDeviation, formatRarityRatio } from '@/lib/score-engine/math-utils';
+import TypeIcon from '@/components/icons/TypeIcon';
+import { HeartIcon } from '@/components/icons/SpecIcons';
 
 export default function SharePage({ params }: { params: Promise<{ shareToken: string }> }) {
   const { shareToken } = use(params);
@@ -82,7 +84,7 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
             <div>
               {data.epithet.typeCode && (
                 <div className="text-sm font-black text-white">
-                  <span className="text-2xl mr-1" aria-hidden>{data.epithet.typeEmoji}</span>
+                  <TypeIcon code={data.epithet.typeCode} color={data.epithet.rarityColor} size={30} className="mr-1.5 align-middle" />
                   <span className="font-mono tracking-widest text-amber-300 mr-1">{data.epithet.typeCode}</span>
                   {data.epithet.typeName}
                 </div>
@@ -97,10 +99,10 @@ export default function SharePage({ params }: { params: Promise<{ shareToken: st
           )}
           {data.loveEpithet && (
             <div className={data.epithet ? 'border-t border-slate-800/80 pt-3' : ''}>
-              <div className="text-[10px] font-bold text-rose-400 mb-0.5">💖 恋愛二つ名</div>
+              <div className="text-[10px] font-bold text-rose-400 mb-0.5"><HeartIcon className="w-3 h-3 mr-1" />恋愛二つ名</div>
               {data.loveEpithet.typeCode && (
                 <div className="text-sm font-black text-white">
-                  <span className="text-2xl mr-1" aria-hidden>{data.loveEpithet.typeEmoji}</span>
+                  <TypeIcon code={data.loveEpithet.typeCode} color={data.loveEpithet.rarityColor} size={30} className="mr-1.5 align-middle" />
                   <span className="font-mono tracking-widest text-rose-300 mr-1">{data.loveEpithet.typeCode}</span>
                   {data.loveEpithet.typeName}
                 </div>

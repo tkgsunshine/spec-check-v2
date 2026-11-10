@@ -19,6 +19,7 @@ import AnalysisLoadingScreen from '@/components/AnalysisLoadingScreen';
 import { Sparkles, Heart, ShieldCheck, UserCheck, ArrowRight, ArrowLeft, Plus, Trash2, Check } from 'lucide-react';
 
 import { sanitizeNumericInput } from '@/lib/score-engine/math-utils';
+import { HeartIcon, SparkleIcon } from '@/components/icons/SpecIcons';
 
 // 全角数字 (０-９) ➔ 半角数字 (0-9) ＆ 先頭ゼロ自動トリム・クリーンアップヘルパー
 export function toHalfWidthDigits(str: string): string {
@@ -596,7 +597,7 @@ export default function HomePage() {
 
   return (
     <main className="max-w-3xl mx-auto px-4 pt-4 sm:pt-6 pb-8 sm:pb-12 md:py-10">
-      {/* 🚀 Dedicated Full-Screen High-Tech AI Analysis Loading Screen */}
+      {/* Dedicated Full-Screen High-Tech AI Analysis Loading Screen */}
       {loading && (
         <AnalysisLoadingScreen
           gender={gender}
@@ -688,7 +689,7 @@ export default function HomePage() {
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 shadow-sm'
                 : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40 shadow-sm'
             }`}>
-              {activeTab === 'LOVE' ? '❤️ 恋愛スペックモード' : '✨ 総合スペックモード'}
+              {activeTab === 'LOVE' ? <><HeartIcon className="w-3.5 h-3.5 mr-1" />恋愛スペックモード</> : <><SparkleIcon className="w-3.5 h-3.5 mr-1" />総合スペックモード</>}
             </span>
           </div>
 

@@ -5,6 +5,7 @@ import { scoreToTopPercent, calcHighPrecisionTopPercent } from '@/lib/score-engi
 import { Trophy, AlertCircle, TrendingUp } from 'lucide-react';
 import InputDataModal from '@/components/InputDataModal';
 import Link from 'next/link';
+import { LockIcon } from '@/components/icons/SpecIcons';
 
 interface SpecRankingsProps {
   metrics: MetricScoreResult[];
@@ -91,11 +92,11 @@ export default function SpecRankings({ metrics, isLoveMode = false, rawInput, is
                 <span>強みのあるスペック TOP 5</span>
                 {isLocked && diagnosisId ? (
                   <Link href={`/purchase/${diagnosisId}`} className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 transition-colors">
-                    🔒 アンロック
+                    <LockIcon className="w-3 h-3 mr-0.5" />アンロック
                   </Link>
                 ) : isLocked ? (
                   <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    🔒 アンロック
+                    <LockIcon className="w-3 h-3 mr-0.5" />アンロック
                   </span>
                 ) : null}
               </h3>
@@ -141,7 +142,7 @@ export default function SpecRankings({ metrics, isLoveMode = false, rawInput, is
                       <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-lg bg-sky-500/10 text-sky-300 border border-sky-500/30 flex items-center gap-1 shrink-0 whitespace-nowrap">
                         <span>上位</span>
                         <span className="filter blur-[2px] select-none">??%</span>
-                        <span className="text-[9px] text-amber-400">🔒</span>
+                        <LockIcon className="w-2.5 h-2.5 text-amber-400" />
                       </span>
                       <span className="text-[10px] sm:text-[11px] font-bold px-1.5 sm:px-2 py-0.5 rounded-lg bg-slate-800 text-emerald-300 border border-slate-700 flex items-center gap-0.5 shrink-0 whitespace-nowrap">
                         <span className="filter blur-[2px] select-none">??</span>
@@ -201,11 +202,11 @@ export default function SpecRankings({ metrics, isLoveMode = false, rawInput, is
                 <span>伸びしろ・改善エリア</span>
                 {isLocked && diagnosisId ? (
                   <Link href={`/purchase/${diagnosisId}`} className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 hover:bg-purple-500/30 transition-colors">
-                    🔒 アンロック
+                    <LockIcon className="w-3 h-3 mr-0.5" />アンロック
                   </Link>
                 ) : isLocked ? (
                   <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                    🔒 アンロック
+                    <LockIcon className="w-3 h-3 mr-0.5" />アンロック
                   </span>
                 ) : null}
               </h3>
@@ -246,7 +247,7 @@ export default function SpecRankings({ metrics, isLoveMode = false, rawInput, is
                 <div className="flex items-center justify-end shrink-0">
                   {isLocked ? (
                     <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 flex items-center gap-1 shrink-0 whitespace-nowrap">
-                      <span className="filter blur-[2px] select-none">??</span> pt 🔒
+                      <span className="filter blur-[2px] select-none">??</span> pt <LockIcon className="w-3 h-3" />
                     </span>
                   ) : (
                     <span className="text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 whitespace-nowrap">

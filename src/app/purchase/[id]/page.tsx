@@ -183,7 +183,7 @@ export default function PurchaseLandingPage({ params }: { params: Promise<{ id: 
             <span className="text-[10px] font-bold text-slate-400 block">{currentEpithet?.typeCode ? "あなたのタイプ" : "獲得した二つ名"}</span>
             <span className="text-xs sm:text-sm font-black text-amber-300">
               {currentEpithet?.typeCode
-                ? `${currentEpithet.typeEmoji ?? ""} ${currentEpithet.typeName}（${currentEpithet.typeCode}）`
+                ? `${currentEpithet.typeName}（${currentEpithet.typeCode}）`
                 : `『${currentEpithet?.title || "ハイスペック候補"}』`}
             </span>
           </div>

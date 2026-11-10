@@ -16,6 +16,8 @@ import { runDiagnosisV3 } from '@/lib/score-engine';
 import { scoreToTopPercent, scoreToDeviation, formatRarityRatio } from '@/lib/score-engine/math-utils';
 import { getMbtiEconomicEvaluationText, getMbtiLoveEvaluationText } from '@/lib/score-engine/mbti';
 import { getExperienceEvaluationText } from '@/lib/score-engine/experience';
+import TypeIcon from '@/components/icons/TypeIcon';
+import { JapanIcon, LockIcon, PointRightIcon } from '@/components/icons/SpecIcons';
 
 function generateOverallEvaluationText(params: {
   isLoveMode: boolean;
@@ -336,7 +338,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           <span className={`text-xs sm:text-sm font-black flex items-center gap-1.5 transition-all ${
             isLoveMode ? 'text-indigo-300 group-hover:text-indigo-200' : 'text-pink-300 group-hover:text-pink-200'
           }`}>
-            <span>👉</span>
+            <PointRightIcon className="w-4 h-4" />
             <span className="underline underline-offset-4 decoration-current">{isLoveMode ? '総合スペックを確認する' : '恋愛スペックを確認する'}</span>
           </span>
         </div>
@@ -388,7 +390,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
 
           {currentEpithet.typeCode && (
             <div className="mb-1">
-              <div className="text-5xl sm:text-6xl leading-none mb-2 drop-shadow-lg" aria-hidden>{currentEpithet.typeEmoji}</div>
+              <div className="mb-2 flex justify-center drop-shadow-lg"><TypeIcon code={currentEpithet.typeCode} color={currentEpithet.rarityColor} size={72} /></div>
               <div className="text-[11px] sm:text-xs font-bold text-slate-400 tracking-wide">
                 {isLoveMode ? 'あなたの恋愛タイプ' : 'あなたのスペックタイプ'}
               </div>
@@ -423,7 +425,8 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
             <div className="mt-3 text-xs sm:text-sm text-slate-300">
               相性◎のタイプ：
               <span className="font-black text-white">
-                {currentEpithet.bestMatch.emoji} {currentEpithet.bestMatch.name}
+                <TypeIcon code={currentEpithet.bestMatch.code} size={22} className="mr-1 align-[-0.35em]" />
+                {currentEpithet.bestMatch.name}
                 <span className="font-mono text-amber-300 ml-1">（{currentEpithet.bestMatch.code}）</span>
               </span>
             </div>
@@ -468,7 +471,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
           {/* 全国比較併記バッジ */}
           {nationwideScore !== null && nationwideTopPercent !== null && (
             <div className="inline-flex flex-wrap items-center justify-center gap-x-2 gap-y-0.5 px-3.5 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-[11px] font-bold text-slate-300 shadow-inner">
-              <span className="text-slate-400">🇯🇵 全国の同世代ベース:</span>
+              <span className="text-slate-400 inline-flex items-center gap-1"><JapanIcon className="w-4 h-4" /> 全国の同世代ベース:</span>
               <span className="text-emerald-400 font-black">
                 偏差値 {scoreToDeviation(nationwideScore).toFixed(1)}・上位 {nationwideTopPercent}%
               </span>
@@ -512,7 +515,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
             <span className={`text-xs sm:text-sm font-black flex items-center gap-1.5 transition-all ${
               isLoveMode ? 'text-indigo-300 group-hover:text-indigo-200' : 'text-pink-300 group-hover:text-pink-200'
             }`}>
-              <span>👉</span>
+              <PointRightIcon className="w-4 h-4" />
               <span className="underline underline-offset-4 decoration-current">{isLoveMode ? '総合スペックを確認する' : '恋愛スペックを確認する'}</span>
             </span>
           </div>
@@ -561,7 +564,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
         {({ isUnlocked }) => (
           <>
             {/* 同世代・政府統計データに基づくカテゴリ別比較スコア */}
-            <div className="glass-surface rounded-3xl p-6 md:p-8 border border-slate-800/80">
+            <div className="glass-surface rounded-3xl p-4 sm:p-6 md:p-8 border border-slate-800/80">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
                 <div className="text-center sm:text-left min-w-0">
                   <h2 className="text-base sm:text-lg md:text-xl font-black text-slate-100 flex flex-wrap items-center justify-center sm:justify-start gap-2">
@@ -571,7 +574,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                     </span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 inline-flex items-center gap-1">
-                        🔒 プレミアム限定
+                        <LockIcon className="w-3 h-3" /> プレミアム限定
                       </span>
                     )}
                   </h2>
@@ -611,18 +614,18 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
               </div>
 
               {/* 総評テキスト分析ブロック（未アンロック時は冒頭のみ見せて下部フェードアウト＆シマープレビュー） */}
-              <div className="mt-6 p-5 md:p-6 rounded-2xl glass-surface border border-indigo-500/30 bg-slate-900/60 shadow-xl relative overflow-hidden">
+              <div className="mt-6 -mx-2 sm:mx-0 p-3 sm:p-5 md:p-6 rounded-2xl glass-surface border border-indigo-500/30 bg-slate-900/60 shadow-xl relative overflow-hidden">
                 <div className="flex items-center justify-between gap-2 mb-3">
                   <div className="flex items-center gap-2.5">
                     <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
                       <FileText className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-bold text-slate-100 flex items-center gap-2">
-                        <span>{isLoveMode ? '恋愛スペック診断 総評' : '総合スペック診断 総評'}</span>
+                      <h3 className="text-sm font-bold text-slate-100 flex flex-wrap items-center gap-x-2 gap-y-1">
+                        <span className="whitespace-nowrap">{isLoveMode ? '恋愛スペック診断 総評' : '総合スペック診断 総評'}</span>
                         {!isUnlocked && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                            🔒 冒頭プレビュー中
+                          <span className="whitespace-nowrap text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                            <LockIcon className="w-3 h-3 inline-block mr-0.5" />冒頭プレビュー中
                           </span>
                         )}
                       </h3>
@@ -635,7 +638,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                     {overallEvaluationText.fullText}
                   </div>
                 ) : (
-                  <div className="relative rounded-2xl overflow-hidden min-h-[480px] flex items-center justify-center p-4 sm:p-8 bg-slate-950/60 border border-slate-800">
+                  <div className="relative rounded-2xl overflow-hidden min-h-[420px] flex items-center justify-center p-0 sm:p-8 sm:bg-slate-950/60 sm:border sm:border-slate-800">
                     {/* 背景のモザイク文章（全文） */}
                     <div className="absolute inset-0 p-6 text-xs sm:text-sm text-slate-300 filter blur-[8px] select-none pointer-events-none opacity-50 overflow-hidden leading-relaxed whitespace-pre-line font-medium">
                       {overallEvaluationText.fullText}
@@ -645,7 +648,7 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                     <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/90 to-slate-950 pointer-events-none" />
 
                     {/* CTAカード（絶対に被らず、中央に綺麗に配置） */}
-                    <div className="w-full max-w-md p-5 sm:p-6 rounded-3xl bg-slate-950/90 border border-purple-500/40 backdrop-blur-xl shadow-2xl shadow-purple-950/60 text-center space-y-3.5 relative z-10 overflow-hidden">
+                    <div className="w-full max-w-md px-4 py-5 sm:p-6 rounded-2xl sm:rounded-3xl bg-slate-950/90 border border-purple-500/40 backdrop-blur-xl shadow-2xl shadow-purple-950/60 text-center space-y-3.5 relative z-10 overflow-hidden">
                       {/* Decorative Glow */}
                       <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-44 h-44 bg-purple-600/25 rounded-full blur-3xl pointer-events-none" />
 
@@ -656,8 +659,8 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
 
                       {/* Title & Subtitle */}
                       <div className="space-y-1 max-w-sm mx-auto">
-                        <h4 className="text-base sm:text-lg font-black text-white">
-                          {isLoveMode ? '恋愛深層総評 ＆ 全7章の完全アンロック' : '総合深層総評 ＆ 全7章の完全アンロック'}
+                        <h4 className="text-[15px] sm:text-lg font-black text-white leading-snug">
+                          {isLoveMode ? '恋愛深層総評と全7章をアンロック' : '総合深層総評と全7章をアンロック'}
                         </h4>
                         <p className="text-[11px] sm:text-xs text-slate-300 leading-snug">
                           1回買い切り ¥500（月額課金・追加費用なし）で、あなたの強み相乗効果・弱点克服・MBTI深層解析を完全アンロック
@@ -665,22 +668,22 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                       </div>
 
                       {/* 4 Benefits Grid */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-left text-[11px] sm:text-xs text-slate-300 py-0.5">
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-slate-800">
+                      <div className="grid grid-cols-2 gap-1.5 sm:gap-2 text-left text-[11px] sm:text-xs text-slate-300 py-0.5">
+                        <div className="flex items-center gap-1.5 px-2 py-2 rounded-xl bg-slate-900/80 border border-slate-800 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>強み相乗効果・詳細分析</span>
+                          <span>強みの相乗効果</span>
                         </div>
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-slate-800">
+                        <div className="flex items-center gap-1.5 px-2 py-2 rounded-xl bg-slate-900/80 border border-slate-800 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>弱点・改善アドバイス</span>
+                          <span>弱点の改善策</span>
                         </div>
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-slate-800">
+                        <div className="flex items-center gap-1.5 px-2 py-2 rounded-xl bg-slate-900/80 border border-slate-800 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>MBTI深層特性 ＆ 適性診断</span>
+                          <span>MBTI深層・適性</span>
                         </div>
-                        <div className="flex items-center gap-1.5 p-2 rounded-xl bg-slate-900/80 border border-slate-800">
+                        <div className="flex items-center gap-1.5 px-2 py-2 rounded-xl bg-slate-900/80 border border-slate-800 whitespace-nowrap">
                           <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                          <span>今後の具体的アクション</span>
+                          <span>次の具体的行動</span>
                         </div>
                       </div>
 
@@ -689,19 +692,18 @@ export default function ResultPage({ params }: { params: Promise<{ id: string }>
                         <Link
                           href={`/purchase/${id}`}
                           scroll={true}
-                          className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:opacity-95 active:scale-[0.98] text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-purple-600/40 transition-all cursor-pointer group"
+                          className="w-full py-3.5 px-3 sm:px-5 rounded-2xl bg-gradient-to-r from-purple-600 via-indigo-600 to-pink-600 hover:opacity-95 active:scale-[0.98] text-white font-black text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-xl shadow-purple-600/40 transition-all cursor-pointer group"
                         >
                           <Unlock className="w-4 h-4" />
-                          <span>¥500 で総評全文・詳細データをアンロック</span>
+                          <span className="whitespace-nowrap">¥500 で総評全文・詳細データを見る</span>
                           <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
                         </Link>
 
-                        <div className="flex items-center justify-center gap-3 text-[10px] text-slate-400">
-                          <span className="flex items-center gap-1">
+                        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[10px] text-slate-400">
+                          <span className="flex items-center gap-1 whitespace-nowrap">
                             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> Apple Pay / Google Pay / カード対応
                           </span>
-                          <span>•</span>
-                          <span>買い切り・即時反映</span>
+                          <span className="whitespace-nowrap">買い切り・即時反映</span>
                         </div>
                       </div>
                     </div>

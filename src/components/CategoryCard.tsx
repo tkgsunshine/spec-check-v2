@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import DeviationCurve, { useRevealProgress } from '@/components/DeviationCurve';
+import DeviationCurve, { animatedDeviation, useRevealProgress } from '@/components/DeviationCurve';
 import { scoreToDeviation } from '@/lib/score-engine/math-utils';
+import { LockIcon } from '@/components/icons/SpecIcons';
 
 interface CategoryCardProps {
   labelJa: string;
@@ -15,7 +16,7 @@ interface CategoryCardProps {
 }
 
 export default function CategoryCard({ labelJa, labelEn, score, topPercent, colorTheme, isLocked = false, diagnosisId }: CategoryCardProps) {
-  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(1300);
+  const { ref: cardRef, progress } = useRevealProgress<HTMLDivElement>(5000);
   const deviation = scoreToDeviation(score);
 
   // 3-Tier Harmonious Color System:
@@ -87,10 +88,11 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
       <div className="w-full flex flex-col items-center mb-1">
         <span className="text-[9px] font-extrabold text-slate-400 tracking-wider">偏差値</span>
         <span className={`text-2xl leading-none tracking-tight tabular-nums ${scoreTextColor}`}>
-          {(deviation * progress).toFixed(1)}
+          {animatedDeviation(deviation, progress).toFixed(1)}
+          <span className="ml-0.5 text-[10px] tracking-normal">pt</span>
         </span>
         <div className="w-full max-w-[112px] mt-2">
-          <DeviationCurve deviation={50 + (deviation - 50) * progress} color={strokeColor} size="sm" />
+          <DeviationCurve deviation={animatedDeviation(deviation, progress)} color={strokeColor} size="sm" />
         </div>
       </div>
 
@@ -102,7 +104,7 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
             <span className="text-xs sm:text-sm font-black font-mono text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-200 to-amber-300 tracking-tight">
               ??%
             </span>
-            <span className="text-xs text-amber-300 animate-pulse ml-0.5">🔒</span>
+            <LockIcon className="w-3 h-3 text-amber-300 animate-pulse ml-0.5" />
           </div>
           <span className="text-[9px] font-extrabold text-purple-300 group-hover:text-amber-300 transition-colors tracking-tight mt-0.5">
             タップでアンロック

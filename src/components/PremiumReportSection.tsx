@@ -26,6 +26,7 @@ import {
   Share2,
   Globe,
 } from 'lucide-react';
+import { BoltIcon, LockIcon, MedalIcon, SparkleIcon, WarningIcon } from '@/components/icons/SpecIcons';
 
 interface PremiumReportSectionProps {
   result: OverallDiagnosisResultV3;
@@ -118,7 +119,7 @@ export default function PremiumReportSection({
       : `${age - 1}歳 〜 ${age + 6}歳`;
 
   // 自己紹介文の生成（2倍の分量・構成化）
-  const profileAppText = `はじめまして！プロフィールをご覧いただきありがとうございます✨
+  const profileAppText = `はじめまして！プロフィールをご覧いただきありがとうございます。
 ${prefectureName}で働いている${age}歳の${nickname}です。
 
 【仕事について】
@@ -135,7 +136,7 @@ ${prefectureName}で働いている${age}歳の${nickname}です。
 【理想の関係】
 お互いの仕事や一人の時間も尊重しつつ、美味しいものを一緒に食べたり、他愛もないことで笑い合える自然体な関係が理想です。
 
-まずはメッセージで気軽に色々お話しできたら嬉しいです！どうぞよろしくお願いします✨`;
+まずはメッセージで気軽に色々お話しできたら嬉しいです！どうぞよろしくお願いします。`;
 
   const profileMarriageText = `はじめまして。プロフィールをご覧いただき誠にありがとうございます。
 ${nickname}と申します。${prefectureName}在住の${age}歳です。
@@ -253,7 +254,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
     // 適合度スコア順に降順ソートし、上位4件を抽出
     const sorted = [...allServices].sort((a, b) => b.baseFit - a.baseFit).slice(0, 4);
 
-    const medals = ['🥇 1位', '🥈 2位', '🥉 3位', '🎖️ 4位'];
+    const medals = ['1位', '2位', '3位', '4位'];
     const borderColors = [
       'border-amber-500/50 bg-amber-500/5',
       'border-purple-500/40 bg-purple-500/5',
@@ -526,7 +527,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
               </span>
               {!isUnlocked && (
                 <span className="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/40 animate-pulse">
-                  ✨ プレミアム限定データ
+                  <SparkleIcon className="w-2.5 h-2.5 mr-0.5" />プレミアム限定データ
                 </span>
               )}
             </div>
@@ -565,13 +566,13 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
             }}
             className="text-[10px] font-bold text-slate-400 hover:text-slate-200 px-2.5 py-1.5 rounded-lg bg-slate-900/90 border border-slate-800 hover:bg-slate-800 transition-all cursor-pointer"
           >
-            {isUnlocked ? '🔒 ロック状態をプレビュー' : '⚡ テスト即時アンロック'}
+            {isUnlocked ? <><LockIcon className="w-3 h-3 mr-1" />ロック状態をプレビュー</> : <><BoltIcon className="w-3 h-3 mr-1" />テスト即時アンロック</>}
           </button>
         </div>
       </div>
 
       {/* レポートコンテンツエリア */}
-      <div className="p-4 sm:p-6 md:p-8 space-y-8">
+      <div className="px-2 py-4 sm:p-6 md:p-8 space-y-8">
         {/* 1. 内包された詳細コンポーネント（カテゴリ別カード、総評、強みTOP5・伸びしろ） */}
         {typeof children === 'function' ? children({ isUnlocked }) : children}
 
@@ -598,7 +599,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                       <span>同世代異性 1,000人マッチング受容シミュレーション</span>
                       {!isUnlocked && (
                         <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                          🔒 プレミアム
+                          <LockIcon className="w-3 h-3 mr-0.5" />プレミアム
                         </span>
                       )}
                     </h4>
@@ -622,7 +623,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                           888
                         </span>
                         <span className="text-sm font-bold text-slate-400">/ 1,000人</span>
-                        <span className="text-xs text-amber-400 ml-1">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400 ml-1" />
                       </div>
                     )}
                   </div>
@@ -639,7 +640,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                         <span className="text-2xl sm:text-3xl font-black text-slate-300 filter blur-[8px] select-none font-mono">
                           88.8%
                         </span>
-                        <span className="text-xs text-amber-400 ml-1">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400 ml-1" />
                       </div>
                     )}
                   </div>
@@ -656,7 +657,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                         <span className="text-xl sm:text-2xl font-black text-slate-300 filter blur-[8px] select-none font-mono">
                           S+ (最高位クラス)
                         </span>
-                        <span className="text-xs text-amber-400 ml-1">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400 ml-1" />
                       </div>
                     )}
                   </div>
@@ -676,14 +677,14 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                  {battlefieldRanking.map((service) => (
+                  {battlefieldRanking.map((service, index) => (
                     <div
                       key={service.id}
                       className={`p-3.5 rounded-xl border space-y-2 relative overflow-hidden transition-all duration-300 ${service.cardClass}`}
                     >
                       <div className="flex items-center justify-between flex-wrap gap-1.5">
                         <span className={`inline-flex items-center gap-1 text-[11px] font-black px-2.5 py-0.5 rounded-full border ${service.color}`}>
-                          {service.medal}：{service.name}
+                          <MedalIcon rank={index + 1} className="w-4 h-4" />{service.medal}：{service.name}
                         </span>
                         <span className="text-xs font-black text-amber-300 font-mono">
                           適合度 {service.fitScore}%
@@ -738,7 +739,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     <span>あなたに最も惹かれやすい異性の特徴・相性データ（全7項目）</span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 border border-pink-500/30">
-                        🔒 プレミアム
+                        <LockIcon className="w-3 h-3 mr-0.5" />プレミアム
                       </span>
                     )}
                   </h4>
@@ -760,7 +761,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-base sm:text-lg font-black text-slate-300 filter blur-[8px] select-none font-mono">24歳 〜 29歳</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -787,7 +788,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-base sm:text-lg font-black text-slate-300 filter blur-[8px] select-none font-mono">年収 600万〜1,200万円</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -814,7 +815,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-sm sm:text-base font-black text-slate-300 filter blur-[8px] select-none font-mono">ENFJ / INFJ / INTJ</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -841,7 +842,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-xs sm:text-sm font-black text-slate-300 filter blur-[8px] select-none">大手総合職・専門職/士業</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -868,7 +869,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-xs sm:text-sm font-black text-slate-300 filter blur-[8px] select-none">大学卒以上（知的好奇心を共有）</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -895,7 +896,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-xs sm:text-sm font-black text-slate-300 filter blur-[8px] select-none">相互自立型 ＆ 心を開くと甘え上手</p>
-                        <span className="text-xs text-amber-400">🔒</span>
+                        <LockIcon className="w-3 h-3 text-amber-400" />
                       </div>
                     )}
                   </div>
@@ -921,7 +922,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                   ) : (
                     <div className="flex items-center gap-2 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
                       <p className="text-xs sm:text-sm text-slate-300 filter blur-[8px] select-none">第一印象の清潔感と知性のギャップによる安心感が最大の決定打となります。</p>
-                      <span className="text-xs text-amber-400 font-bold shrink-0">🔒 アンロック</span>
+                      <span className="text-xs text-amber-400 font-bold shrink-0"><LockIcon className="w-3 h-3 mr-0.5" />アンロック</span>
                     </div>
                   )}
                 </div>
@@ -953,7 +954,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     <span>あなたと絶対に合わない「相性最悪な地雷異性タイプ ワースト3」</span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30">
-                        🔒 プレミアム
+                        <LockIcon className="w-3 h-3 mr-0.5" />プレミアム
                       </span>
                     )}
                   </h4>
@@ -966,7 +967,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                   <div key={item.id} className="p-3.5 rounded-xl bg-slate-950/70 border border-rose-900/50 space-y-1.5">
                     <div>
                       <span className="text-[10px] font-black text-rose-400 bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30">
-                        ⚠️ ワースト {idx + 1}
+                        <WarningIcon className="w-3 h-3 mr-0.5" />ワースト {idx + 1}
                       </span>
                     </div>
                     {isUnlocked ? (
@@ -983,7 +984,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     ) : (
                       <div className="flex items-center gap-2">
                         <p className="text-slate-400 text-[11px] filter blur-[8px] select-none">{item.blurPreview}</p>
-                        <span className="text-[10px] text-amber-400 font-bold shrink-0">🔒 アンロック</span>
+                        <span className="text-[10px] text-amber-400 font-bold shrink-0"><LockIcon className="w-3 h-3 mr-0.5" />アンロック</span>
                       </div>
                     )}
                   </div>
@@ -1132,7 +1133,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     <span>各項目別：何をすれば何pt上がるか具体策（最大 +{totalPotentialPt}pt）</span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        🔒 プレミアム
+                        <LockIcon className="w-3 h-3 mr-0.5" />プレミアム
                       </span>
                     )}
                   </h4>
@@ -1192,7 +1193,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                               <p className="text-slate-400 text-[11px] filter blur-[8px] select-none">
                                 {cat.actionDetail}
                               </p>
-                              <span className="text-[10px] text-amber-400 font-bold shrink-0">🔒 アンロック</span>
+                              <span className="text-[10px] text-amber-400 font-bold shrink-0"><LockIcon className="w-3 h-3 mr-0.5" />アンロック</span>
                             </div>
                           )}
                         </div>
@@ -1246,7 +1247,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
                     <span>パーソナライズ「即コピペで使える最強プロフィール文章」</span>
                     {!isUnlocked && (
                       <span className="shrink-0 whitespace-nowrap inline-flex items-center gap-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-                        🔒 プレミアム
+                        <LockIcon className="w-3 h-3 mr-0.5" />プレミアム
                       </span>
                     )}
                   </h4>

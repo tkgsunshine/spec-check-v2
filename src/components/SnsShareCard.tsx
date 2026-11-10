@@ -1,9 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { Share2, Check, Copy, ExternalLink, X, Download, Heart, Sparkles } from 'lucide-react';
-import { MetricScoreResult, EpithetResult } from '@/types/spec-check';
-import { formatRarityRatio, scoreToDeviation } from '@/lib/score-engine/math-utils';
+import { Check, Copy, X, Download, Heart, Sparkles } from 'lucide-react';
+import { EpithetResult } from '@/types/spec-check';
+import DeviationCurve from '@/components/DeviationCurve';
+import { formatRarityRatio, normalPDF, scoreToDeviation } from '@/lib/score-engine/math-utils';
+import TypeIcon from '@/components/icons/TypeIcon';
 
 interface RadarAxis {
   labelJa: string;
@@ -41,31 +43,12 @@ export default function SnsShareCard({
   nickname,
   prefectureName,
   isLoveMode = false,
-  categoryScores,
-  radarAxes,
   epithet,
   epithetTitle,
 }: SnsShareCardProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
-
-  // 6軸データの準備 (デフォルト補動)
-  const defaultAxes: RadarAxis[] = radarAxes || (isLoveMode ? [
-    { labelJa: '容姿・写真', labelEn: 'APPEARANCE', score: categoryScores.body },
-    { labelJa: '体型・身長', labelEn: 'PHYSIQUE', score: 60 },
-    { labelJa: '年収・純資産', labelEn: 'ECONOMIC', score: categoryScores.economic },
-    { labelJa: 'キャリア・影響力', labelEn: 'CAREER', score: categoryScores.career },
-    { labelJa: '家庭・結婚', labelEn: 'MARRIAGE', score: 75 },
-    { labelJa: '年齢', labelEn: 'AGE', score: 80 },
-  ] : [
-    { labelJa: '身体', labelEn: 'BODY', score: categoryScores.body },
-    { labelJa: '年収・純資産', labelEn: 'ECONOMIC', score: categoryScores.economic },
-    { labelJa: 'キャリア', labelEn: 'CAREER', score: categoryScores.career },
-    { labelJa: '学歴・知性', labelEn: 'ACADEMIC', score: 75 },
-    { labelJa: 'SNS・影響力', labelEn: 'SOCIAL', score: categoryScores.social },
-    { labelJa: 'グローバル力', labelEn: 'GLOBAL', score: categoryScores.ability || 65 },
-  ]);
 
   const shareUrl = typeof window !== 'undefined' ? `${window.location.origin}/share/${shareToken}` : '';
   const genderTextJa = gender === 'MALE' ? '男性' : '女性';
@@ -74,6 +57,11 @@ export default function SnsShareCard({
   const modeTitle = isLoveMode ? '恋愛スペック診断' : '人間スペック診断';
   const deviationLabel = isLoveMode ? '恋愛偏差値' : '人間スペック偏差値';
   const deviation = scoreToDeviation(score);
+  // 結果画面の偏差値ブロックと同じ文言
+  const populationText = prefectureName
+    ? `同世代（${age}歳・${prefectureName}）の${genderTextJa}の中で`
+    : `同世代（${age}歳）の${genderTextJa}の中で`;
+  const suffixText = isLoveMode ? 'の恋愛市場価値' : 'の総合スペック';
   const profileHeaderStr = `${displayNickname} / ${age}歳 / ${genderTextJa}${prefStr} の${modeTitle}結果`;
 
   const rankShareStr = (topPercent !== undefined && topPercent !== null && topPercent <= 50)
@@ -98,7 +86,7 @@ export default function SnsShareCard({
   };
 
   const typeShareStr = epithet?.typeCode
-    ? `\n${isLoveMode ? '恋愛タイプ' : 'タイプ'}：${epithet.typeEmoji ?? ''}${epithet.typeName}（${epithet.typeCode}）`
+    ? `\n${isLoveMode ? '恋愛タイプ' : 'タイプ'}：${epithet.typeName}（${epithet.typeCode}）`
     : '';
   const epithetShareStr = displayEpithetTitle ? `${typeShareStr}\n二つ名：『${displayEpithetTitle}』` : '';
 
@@ -123,32 +111,6 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
     const lineUrl = `https://social-plugins.line.me/lineit/share?url=${encodeURIComponent(shareUrl)}`;
     window.open(lineUrl, '_blank');
   };
-
-  // SVG Geometry Parameters
-  const cx = 160;
-  const cy = 135;
-  const radius = 70;
-  const numAxes = defaultAxes.length;
-
-  const getCoordinates = (index: number, val: number) => {
-    const angle = (Math.PI * 2 / numAxes) * index - Math.PI / 2;
-    const r = (val / 100) * radius;
-    return {
-      x: cx + r * Math.cos(angle),
-      y: cy + r * Math.sin(angle),
-    };
-  };
-
-  // Polygon Points
-  const polygonPoints = defaultAxes
-    .map((axis, i) => {
-      const { x, y } = getCoordinates(i, axis.score);
-      return `${x},${y}`;
-    })
-    .join(' ');
-
-  // Grid levels (20%, 40%, 60%, 80%, 100%)
-  const gridLevels = [0.2, 0.4, 0.6, 0.8, 1.0];
 
   // High-Res Canvas Card Image Generation & Download
   const downloadCardImage = () => {
@@ -192,7 +154,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
       ctx.textAlign = 'center';
       ctx.fillStyle = isLoveMode ? '#f472b6' : '#818cf8';
       ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(`${isLoveMode ? '💖 恋愛スペック診断' : '⚡ 人間スペック診断'} 公式カード`, width / 2, 50);
+      ctx.fillText(`${isLoveMode ? '恋愛スペック診断' : '人間スペック診断'} 公式カード`, width / 2, 50);
 
       // User Profile Header
       ctx.fillStyle = '#ffffff';
@@ -200,7 +162,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
       ctx.fillText(profileHeaderStr, width / 2, 78);
 
       // Epithet Block (結果画面と同デザイン)
-      let currentY = 100;
+      let currentY = 118;
       if (displayEpithetTitle) {
         const tierStr = getTierText();
         if (tierStr) {
@@ -233,131 +195,161 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
         }
       }
 
-      // Score Display
-      const scoreY = displayEpithetTitle ? currentY + 30 : 160;
-      ctx.fillStyle = '#ffffff';
-      ctx.font = '900 64px sans-serif';
-      ctx.fillText(deviation.toFixed(1), width / 2, scoreY);
+      // 偏差値ブロック（結果画面の DeviationHero と同じ構成）
+      const accent = isLoveMode ? '#fb7185' : '#818cf8';
+      let y = displayEpithetTitle ? currentY + 26 : 130;
 
-      ctx.fillStyle = isLoveMode ? '#f472b6' : '#94a3b8';
-      ctx.font = 'bold 15px sans-serif';
-      ctx.fillText(`${deviationLabel}（平均50）`, width / 2, scoreY + 28);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#cbd5e1';
+      ctx.font = '900 18px sans-serif';
+      ctx.fillText(deviationLabel, width / 2, y);
 
-      // TOP % Pill
-      if (topPercent !== undefined && topPercent !== null && topPercent <= 50) {
-        ctx.fillStyle = isLoveMode ? 'rgba(244, 63, 94, 0.25)' : 'rgba(99, 102, 241, 0.25)';
-        ctx.strokeStyle = isLoveMode ? '#fb7185' : '#818cf8';
-        ctx.lineWidth = 1.5;
-        const pillText = `上位 ${topPercent}% (${formatRarityRatio(topPercent)})`;
-        ctx.font = '900 15px sans-serif';
-        const textMetrics = ctx.measureText(pillText);
-        const pillW = Math.max(220, textMetrics.width + 36);
-        const pillH = 36;
-        const pillX = width / 2 - pillW / 2;
-        const pillY = scoreY + 45;
-        ctx.beginPath();
-        ctx.roundRect(pillX, pillY, pillW, pillH, 18);
-        ctx.fill();
-        ctx.stroke();
-
-        ctx.fillStyle = isLoveMode ? '#fda4af' : '#a5b4fc';
-        ctx.font = '900 15px sans-serif';
-        ctx.fillText(pillText, width / 2, pillY + 23);
+      // 大きな偏差値（グラデーション）＋小さな「pt」
+      y += 108;
+      const deviationText = deviation.toFixed(1);
+      ctx.font = '900 120px sans-serif';
+      const numberWidth = ctx.measureText(deviationText).width;
+      ctx.font = '900 34px sans-serif';
+      const unitWidth = ctx.measureText('pt').width;
+      const unitGap = 8;
+      const numberLeft = width / 2 - (numberWidth + unitGap + unitWidth) / 2;
+      const numberGrad = ctx.createLinearGradient(numberLeft, y - 100, numberLeft + numberWidth + unitGap + unitWidth, y);
+      if (isLoveMode) {
+        numberGrad.addColorStop(0, '#f43f5e');
+        numberGrad.addColorStop(1, '#fb7185');
+      } else {
+        numberGrad.addColorStop(0, '#818cf8');
+        numberGrad.addColorStop(1, '#c084fc');
       }
+      ctx.fillStyle = numberGrad;
+      ctx.textAlign = 'left';
+      ctx.font = '900 120px sans-serif';
+      ctx.fillText(deviationText, numberLeft, y);
+      ctx.font = '900 34px sans-serif';
+      ctx.fillText('pt', numberLeft + numberWidth + unitGap, y);
 
-      // Draw Hexagon Radar Chart in Canvas
-      const ccx = width / 2;
-      const ccy = 510;
-      const cradius = 145;
+      // 同世代（◯歳・◯◯）の◯性の中で 上位X% / の総合スペック
+      y += 52;
+      const topText = topPercent !== undefined && topPercent !== null ? `上位${topPercent}%` : '';
+      ctx.font = 'bold 21px sans-serif';
+      const popWidth = ctx.measureText(`${populationText} `).width;
+      ctx.font = '900 27px sans-serif';
+      const topWidth = ctx.measureText(topText).width;
+      let lineX = width / 2 - (popWidth + topWidth) / 2;
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(`${populationText} `, lineX, y);
+      lineX += popWidth;
+      ctx.fillStyle = isLoveMode ? '#fda4af' : '#a5b4fc';
+      ctx.font = '900 27px sans-serif';
+      ctx.fillText(topText, lineX, y);
 
-      // Hexagon Grids
-      gridLevels.forEach(lvl => {
-        ctx.beginPath();
-        for (let i = 0; i < numAxes; i++) {
-          const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-          const gx = ccx + cradius * lvl * Math.cos(angle);
-          const gy = ccy + cradius * lvl * Math.sin(angle);
-          if (i === 0) ctx.moveTo(gx, gy);
-          else ctx.lineTo(gx, gy);
-        }
-        ctx.closePath();
-        ctx.strokeStyle = lvl === 1.0 ? (isLoveMode ? 'rgba(244, 114, 182, 0.4)' : 'rgba(148, 163, 184, 0.4)') : (isLoveMode ? 'rgba(244, 114, 182, 0.15)' : 'rgba(148, 163, 184, 0.15)');
-        ctx.lineWidth = 1.2;
-        ctx.stroke();
-      });
+      y += 34;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 21px sans-serif';
+      ctx.fillText(suffixText, width / 2, y);
 
-      // Axis Lines
-      defaultAxes.forEach((_, i) => {
-        const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-        const ax = ccx + cradius * Math.cos(angle);
-        const ay = ccy + cradius * Math.sin(angle);
+      // 正規分布図と「あなた」の位置
+      const curveLeft = 50;
+      const curveRight = width - 50;
+      const curveTop = y + 40;
+      const curveBase = curveTop + 190;
+      const MIN_DEV = 20;
+      const MAX_DEV = 80;
+      const xOf = (dev: number) => curveLeft + ((dev - MIN_DEV) / (MAX_DEV - MIN_DEV)) * (curveRight - curveLeft);
+      const peak = normalPDF(0);
+      const yOf = (dev: number) => curveBase - (normalPDF((dev - 50) / 10) / peak) * (curveBase - curveTop);
+      const curvePoints: [number, number][] = [];
+      for (let i = 0; i <= 120; i++) {
+        const dev = MIN_DEV + ((MAX_DEV - MIN_DEV) * i) / 120;
+        curvePoints.push([xOf(dev), yOf(dev)]);
+      }
+      const traceCurve = () => {
+        curvePoints.forEach(([px, py], i) => (i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py)));
+      };
 
-        ctx.beginPath();
-        ctx.moveTo(ccx, ccy);
-        ctx.lineTo(ax, ay);
-        ctx.strokeStyle = isLoveMode ? 'rgba(244, 114, 182, 0.2)' : 'rgba(148, 163, 184, 0.2)';
-        ctx.stroke();
-      });
-
-      // Data Polygon Fill
+      // 全体の塗り
+      const areaGrad = ctx.createLinearGradient(0, curveTop, 0, curveBase);
+      areaGrad.addColorStop(0, isLoveMode ? 'rgba(251, 113, 133, 0.22)' : 'rgba(129, 140, 248, 0.22)');
+      areaGrad.addColorStop(1, isLoveMode ? 'rgba(251, 113, 133, 0.02)' : 'rgba(129, 140, 248, 0.02)');
       ctx.beginPath();
-      defaultAxes.forEach((axis, i) => {
-        const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-        const r = (axis.score / 100) * cradius;
-        const px = ccx + r * Math.cos(angle);
-        const py = ccy + r * Math.sin(angle);
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      });
+      traceCurve();
+      ctx.lineTo(xOf(MAX_DEV), curveBase);
+      ctx.lineTo(xOf(MIN_DEV), curveBase);
       ctx.closePath();
-
-      ctx.fillStyle = isLoveMode ? 'rgba(244, 63, 94, 0.35)' : 'rgba(129, 140, 248, 0.35)';
+      ctx.fillStyle = areaGrad;
       ctx.fill();
-      ctx.strokeStyle = isLoveMode ? '#f43f5e' : '#818cf8';
+
+      // あなたより上位の人たちの面積
+      const markerDev = Math.max(MIN_DEV + 1, Math.min(MAX_DEV - 1, deviation));
+      const markerX = xOf(markerDev);
+      const markerY = yOf(markerDev);
+      const tailGrad = ctx.createLinearGradient(0, curveTop, 0, curveBase);
+      tailGrad.addColorStop(0, isLoveMode ? 'rgba(251, 113, 133, 0.55)' : 'rgba(129, 140, 248, 0.55)');
+      tailGrad.addColorStop(1, isLoveMode ? 'rgba(251, 113, 133, 0.15)' : 'rgba(129, 140, 248, 0.15)');
+      ctx.beginPath();
+      ctx.moveTo(markerX, curveBase);
+      ctx.lineTo(markerX, markerY);
+      curvePoints.filter(([px]) => px > markerX).forEach(([px, py]) => ctx.lineTo(px, py));
+      ctx.lineTo(xOf(MAX_DEV), curveBase);
+      ctx.closePath();
+      ctx.fillStyle = tailGrad;
+      ctx.fill();
+
+      // 基準線と曲線
+      ctx.beginPath();
+      ctx.moveTo(curveLeft, curveBase);
+      ctx.lineTo(curveRight, curveBase);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.beginPath();
+      traceCurve();
+      ctx.strokeStyle = accent;
+      ctx.lineWidth = 4;
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+
+      // 平均(50) と あなた の点線
+      ctx.setLineDash([5, 5]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(xOf(50), curveBase);
+      ctx.lineTo(xOf(50), curveTop);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.6)';
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(markerX, curveBase);
+      ctx.lineTo(markerX, markerY);
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.beginPath();
+      ctx.arc(markerX, markerY, 16, 0, Math.PI * 2);
+      ctx.fillStyle = isLoveMode ? 'rgba(251, 113, 133, 0.2)' : 'rgba(129, 140, 248, 0.2)';
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(markerX, markerY, 9, 0, Math.PI * 2);
+      ctx.fillStyle = accent;
+      ctx.fill();
+      ctx.strokeStyle = '#0b1020';
       ctx.lineWidth = 3.5;
       ctx.stroke();
 
-      // Data Dots
-      defaultAxes.forEach((axis, i) => {
-        const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-        const r = (axis.score / 100) * cradius;
-        const px = ccx + r * Math.cos(angle);
-        const py = ccy + r * Math.sin(angle);
+      const labelsCollide = Math.abs(markerX - xOf(50)) < 80;
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 19px sans-serif';
+      ctx.fillText('平均(50)', xOf(50), curveBase + 30);
+      ctx.fillStyle = accent;
+      ctx.font = '900 20px sans-serif';
+      ctx.fillText('あなた', Math.min(Math.max(markerX, curveLeft + 30), curveRight - 30), labelsCollide ? markerY - 26 : curveBase + 30);
 
-        ctx.beginPath();
-        ctx.arc(px, py, 6, 0, Math.PI * 2);
-        ctx.fillStyle = isLoveMode ? '#fb7185' : '#c084fc';
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-      });
-
-      // Labels + Scores
-      defaultAxes.forEach((axis, i) => {
-        const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-        const isTop = i === 0;
-        const isBottom = i === 3;
-        const isRight = i === 1 || i === 2;
-
-        const rDist = isTop ? cradius + 35 : isBottom ? cradius + 35 : cradius + 45;
-        const lx = ccx + rDist * Math.cos(angle);
-        const ly = ccy + rDist * Math.sin(angle);
-
-        ctx.textAlign = isTop || isBottom ? 'center' : isRight ? 'left' : 'right';
-
-        // 項目名
-        ctx.fillStyle = '#f8fafc';
-        ctx.font = 'bold 15px sans-serif';
-        const dyLabel = isTop ? -10 : isBottom ? 5 : -5;
-        ctx.fillText(axis.labelJa, lx, ly + dyLabel);
-
-        // スコア pt
-        ctx.fillStyle = isLoveMode ? '#fda4af' : '#a5b4fc';
-        ctx.font = '900 14px sans-serif';
-        const dyScore = isTop ? 12 : isBottom ? 26 : 15;
-        ctx.fillText(`${axis.score.toFixed(0)} pt`, lx, ly + dyScore);
-      });
+      ctx.fillStyle = '#64748b';
+      ctx.font = '600 15px sans-serif';
+      ctx.fillText('平均偏差値50を基準とした正規分布上のあなたの位置', width / 2, curveBase + 66);
 
       // Footer
       ctx.textAlign = 'center';
@@ -397,8 +389,11 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/85 backdrop-blur-md flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-slate-950/95 border border-slate-800 rounded-3xl p-5 sm:p-7 max-w-sm sm:max-w-md w-full relative text-center my-6 max-h-[92vh] flex flex-col justify-between overflow-y-auto shadow-2xl">
+        // 外側だけをスクロールさせる。中身が画面より高いときも上端が切れないよう、
+        // 中央寄せは min-h-full のラッパーで行う（items-center を直接スクロール領域に付けると上がはみ出す）
+        <div className="fixed inset-0 bg-black/85 backdrop-blur-md z-50 overflow-y-auto overscroll-contain">
+          <div className="flex min-h-full items-center justify-center p-4">
+          <div className="bg-slate-950/95 border border-slate-800 rounded-3xl p-5 sm:p-7 max-w-sm sm:max-w-md w-full relative text-center my-6 shadow-2xl">
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 p-2 text-slate-400 hover:text-white z-10 cursor-pointer"
@@ -454,7 +449,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
 
                   {epithet?.typeCode && (
                     <div className="text-[11px] font-black text-white leading-tight">
-                      <span className="text-base mr-1" aria-hidden>{epithet.typeEmoji}</span>
+                      <TypeIcon code={epithet.typeCode} color={epithet.rarityColor} size={22} className="mr-1 align-middle" />
                       <span className={`font-mono tracking-widest mr-1 ${isLoveMode ? 'text-rose-300' : 'text-amber-300'}`}>{epithet.typeCode}</span>
                       {epithet.typeName}
                     </div>
@@ -485,153 +480,28 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
                 </div>
               )}
 
-              {/* Main Score Display */}
+              {/* 偏差値ブロック（結果画面の DeviationHero と同じ構成） */}
+              <div className="mt-3 text-[11px] font-black tracking-wider text-slate-300">{deviationLabel}</div>
               <div
-                className={`text-3xl sm:text-4xl font-black tracking-tight ${
-                  isLoveMode
-                    ? 'text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-rose-300 to-amber-200 drop-shadow-sm'
-                    : 'text-white'
-                }`}
+                className={`${isLoveMode ? 'gradient-text-pink' : 'gradient-text-indigo'} font-black tracking-tight leading-none mt-1 text-6xl tabular-nums`}
               >
                 {deviation.toFixed(1)}
+                <span className="ml-1 text-xl tracking-normal">pt</span>
               </div>
-              <div
-                className={`text-[10px] font-semibold mb-2 ${
-                  isLoveMode ? 'text-rose-300/80' : 'text-slate-400'
-                }`}
-              >
-                {deviationLabel}（平均50）
+              <p className="mt-2.5 text-[12px] font-bold text-slate-200 leading-relaxed">
+                {populationText}{' '}
+                {topPercent !== undefined && topPercent !== null && (
+                  <span className={`${isLoveMode ? 'text-rose-300' : 'text-indigo-300'} font-black text-sm whitespace-nowrap`}>
+                    上位{topPercent}%
+                  </span>
+                )}
+                <br />
+                {suffixText}
+              </p>
+              <div className="mt-3 px-2">
+                <DeviationCurve deviation={deviation} color={isLoveMode ? '#fb7185' : '#818cf8'} size="lg" />
               </div>
-
-              {topPercent !== undefined && topPercent !== null && topPercent <= 30 && (
-                <div
-                  className={`inline-block px-3 py-0.5 rounded-full text-xs font-black mb-3 border ${
-                    isLoveMode
-                      ? 'bg-rose-500/20 text-rose-300 border-rose-500/40'
-                      : 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40'
-                  }`}
-                >
-                  上位 {topPercent}% ({formatRarityRatio(topPercent)})
-                </div>
-              )}
-
-              {/* 6-Axis Hexagon Radar Chart SVG (各軸の点数付き) */}
-              <div className="w-full flex justify-center items-center my-1 overflow-visible">
-                <svg width="320" height="270" viewBox="-25 -15 370 300" className="overflow-visible">
-                  {/* Grid Hexagons */}
-                  {gridLevels.map((lvl, idx) => (
-                    <polygon
-                      key={idx}
-                      points={defaultAxes
-                        .map((_, i) => {
-                          const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                          const r = radius * lvl;
-                          return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
-                        })
-                        .join(' ')}
-                      fill="none"
-                      stroke={
-                        lvl === 1.0
-                          ? isLoveMode
-                            ? 'rgba(244, 114, 182, 0.4)'
-                            : 'rgba(148, 163, 184, 0.35)'
-                          : isLoveMode
-                          ? 'rgba(244, 114, 182, 0.15)'
-                          : 'rgba(148, 163, 184, 0.15)'
-                      }
-                      strokeWidth="1"
-                    />
-                  ))}
-
-                  {/* Radial Axis Lines */}
-                  {defaultAxes.map((_, i) => {
-                    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                    const ax = cx + radius * Math.cos(angle);
-                    const ay = cy + radius * Math.sin(angle);
-                    return (
-                      <line
-                        key={i}
-                        x1={cx}
-                        y1={cy}
-                        x2={ax}
-                        y2={ay}
-                        stroke={isLoveMode ? 'rgba(244, 114, 182, 0.2)' : 'rgba(148, 163, 184, 0.2)'}
-                        strokeWidth="1"
-                      />
-                    );
-                  })}
-
-                  {/* Data Polygon */}
-                  <polygon
-                    points={polygonPoints}
-                    fill={isLoveMode ? 'rgba(244, 63, 94, 0.35)' : 'rgba(129, 140, 248, 0.35)'}
-                    stroke={isLoveMode ? '#f43f5e' : '#818cf8'}
-                    strokeWidth="2.5"
-                  />
-
-                  {/* Data Vertex Dots */}
-                  {defaultAxes.map((axis, i) => {
-                    const { x, y } = getCoordinates(i, axis.score);
-                    return (
-                      <circle
-                        key={i}
-                        cx={x}
-                        cy={y}
-                        r="3.5"
-                        fill={isLoveMode ? '#fb7185' : '#c084fc'}
-                        stroke="#ffffff"
-                        strokeWidth="1.5"
-                      />
-                    );
-                  })}
-
-                  {/* Axis Labels AND Individual Point Scores */}
-                  {defaultAxes.map((axis, i) => {
-                    const angle = (Math.PI * 2 / numAxes) * i - Math.PI / 2;
-                    const isTop = i === 0;
-                    const isBottom = i === 3;
-                    const isRight = i === 1 || i === 2;
-                    const isLeft = i === 4 || i === 5;
-
-                    const rDist = isTop ? radius + 24 : isBottom ? radius + 24 : radius + 28;
-                    const lx = cx + rDist * Math.cos(angle);
-                    const ly = cy + rDist * Math.sin(angle);
-
-                    const textAnchor = isTop || isBottom ? 'middle' : isLeft ? 'end' : 'start';
-                    const dx = isLeft ? -4 : isRight ? 4 : 0;
-
-                    return (
-                      <g key={i} transform={`translate(${dx}, 0)`}>
-                        {/* 項目名 (日本語) */}
-                        <text
-                          x={lx}
-                          y={isTop ? ly - 8 : isBottom ? ly : ly - 6}
-                          fill="#f8fafc"
-                          fontSize="10"
-                          fontWeight="bold"
-                          textAnchor={textAnchor}
-                          dominantBaseline="central"
-                        >
-                          {axis.labelJa}
-                        </text>
-
-                        {/* 各軸のスコア pt */}
-                        <text
-                          x={lx}
-                          y={isTop ? ly + 6 : isBottom ? ly + 14 : ly + 8}
-                          fill={isLoveMode ? '#fda4af' : '#a5b4fc'}
-                          fontSize="10"
-                          fontWeight="900"
-                          textAnchor={textAnchor}
-                          dominantBaseline="central"
-                        >
-                          {axis.score.toFixed(0)} pt
-                        </text>
-                      </g>
-                    );
-                  })}
-                </svg>
-              </div>
+              <p className="mt-1 text-[9px] font-semibold text-slate-500">平均偏差値50を基準とした正規分布上のあなたの位置</p>
 
               <div
                 className={`text-[10px] font-bold tracking-widest mt-3 ${
@@ -688,9 +558,9 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
               </div>
             </div>
           </div>
+          </div>
         </div>
       )}
     </>
   );
 }
-

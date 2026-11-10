@@ -4,10 +4,12 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { normalPDF } from '@/lib/score-engine/math-utils';
 
 /**
- * 画面に入ったら 0→1 へ easeOutQuart で進む進捗値を返す。
+ * 画面に入ったら 0→1 へ進む進捗値を返す。
  * 偏差値の数字のカウントアップと、分布図上の「あなた」マーカーの移動を同期させるために使う。
+ * 「どこまで上がるんだ！？」というドキドキ感を出すため、しっかり画面に入ってから少し間を置いて始め、
+ * 後半に長い「溜め」を作る（suspenseEase 参照）。
  */
-export function useRevealProgress<T extends Element>(duration = 1400) {
+export function useRevealProgress<T extends Element>(duration = 7000, delay = 350) {
   const ref = useRef<T>(null);
   const [started, setStarted] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -19,7 +21,7 @@ export function useRevealProgress<T extends Element>(duration = 1400) {
       entries => {
         if (entries.some(e => e.isIntersecting)) setStarted(true);
       },
-      { threshold: 0.3, rootMargin: '0px 0px -60px 0px' }
+      { threshold: 0.5, rootMargin: '0px 0px -80px 0px' }
     );
     observer.observe(element);
     return () => observer.disconnect();
@@ -32,14 +34,40 @@ export function useRevealProgress<T extends Element>(duration = 1400) {
     const step = (ts: number) => {
       if (startTs === null) startTs = ts;
       const t = Math.min((ts - startTs) / duration, 1);
-      setProgress(1 - Math.pow(1 - t, 4));
+      setProgress(suspenseEase(t));
       if (t < 1) raf = window.requestAnimationFrame(step);
     };
-    raf = window.requestAnimationFrame(step);
-    return () => window.cancelAnimationFrame(raf);
-  }, [started, duration]);
+    const timer = window.setTimeout(() => {
+      raf = window.requestAnimationFrame(step);
+    }, delay);
+    return () => {
+      window.clearTimeout(timer);
+      window.cancelAnimationFrame(raf);
+    };
+  }, [started, duration, delay]);
 
   return { ref, progress };
+}
+
+// 前半 RUSH_TIME の時間で全体の 3分の2（RUSH_PROGRESS）まで一定速度でテンポよく上がり、
+// そこでガクッとブレーキをかけて、残りの長い時間でじわじわ本来の値に近づく（後半の溜め）。
+const RUSH_TIME = 0.3;
+const RUSH_PROGRESS = 2 / 3;
+// 後半の減速カーブの強さ（2 = easeOutQuad）。大きくすると最後がより止まって見える
+const TAIL_POWER = 2;
+
+export function suspenseEase(t: number) {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  if (t < RUSH_TIME) return (RUSH_PROGRESS * t) / RUSH_TIME;
+  const u = (t - RUSH_TIME) / (1 - RUSH_TIME);
+  return RUSH_PROGRESS + (1 - RUSH_PROGRESS) * (1 - Math.pow(1 - u, TAIL_POWER));
+}
+
+/** アニメーション中に表示する偏差値。分布図の左端（偏差値20）から本来の値まで上がる。 */
+export function animatedDeviation(deviation: number, progress: number) {
+  const from = Math.min(MIN_DEV, deviation);
+  return from + (deviation - from) * progress;
 }
 
 interface DeviationCurveProps {
@@ -53,7 +81,7 @@ interface DeviationCurveProps {
 }
 
 // 横軸は偏差値 20〜80（±3σ）を表示する
-const MIN_DEV = 20;
+export const MIN_DEV = 20;
 const MAX_DEV = 80;
 
 export default function DeviationCurve({ deviation, color, size = 'lg', className = '' }: DeviationCurveProps) {
