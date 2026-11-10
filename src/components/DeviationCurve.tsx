@@ -49,19 +49,19 @@ export function useRevealProgress<T extends Element>(duration = 7000, delay = 35
   return { ref, progress };
 }
 
-// 前半 RUSH_TIME の時間で RUSH_PROGRESS まで一定速度で駆け上がり、
-// 残りの長い時間で速度を落としながらじわじわ本来の値に近づく（つなぎ目で速度は連続）。
-const RUSH_TIME = 0.25;
-const RUSH_PROGRESS = 0.4;
+// 前半 RUSH_TIME の時間で全体の 3分の2（RUSH_PROGRESS）まで一定速度でテンポよく上がり、
+// そこでガクッとブレーキをかけて、残りの長い時間でじわじわ本来の値に近づく（後半の溜め）。
+const RUSH_TIME = 0.3;
+const RUSH_PROGRESS = 2 / 3;
+// 後半の減速カーブの強さ（2 = easeOutQuad）。大きくすると最後がより止まって見える
+const TAIL_POWER = 2;
 
 export function suspenseEase(t: number) {
   if (t <= 0) return 0;
   if (t >= 1) return 1;
   if (t < RUSH_TIME) return (RUSH_PROGRESS * t) / RUSH_TIME;
   const u = (t - RUSH_TIME) / (1 - RUSH_TIME);
-  // 後半の減速の強さ。前半の速度とつなぎ目で一致させる
-  const n = (RUSH_PROGRESS / RUSH_TIME) * (1 - RUSH_TIME) / (1 - RUSH_PROGRESS);
-  return RUSH_PROGRESS + (1 - RUSH_PROGRESS) * (1 - Math.pow(1 - u, n));
+  return RUSH_PROGRESS + (1 - RUSH_PROGRESS) * (1 - Math.pow(1 - u, TAIL_POWER));
 }
 
 /** アニメーション中に表示する偏差値。分布図の左端（偏差値20）から本来の値まで上がる。 */
