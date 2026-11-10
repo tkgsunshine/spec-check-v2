@@ -18,6 +18,14 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [customHensachi, setCustomHensachi] = useState<number | ''>(initialHensachi || '');
   const wrapperRef = useRef<HTMLDivElement>(null);
+  // 候補を選んだ直後の query 変更で、ドロップダウンが再度開かないようにする
+  const skipNextOpenRef = useRef(false);
+
+  const normalize = (s: string) => s.replace(/\s+/g, '').toLowerCase();
+  const trimmedQuery = query.trim();
+  // 入力と完全一致する候補があるか（空白の有無・大文字小文字は無視）
+  const hasExactMatch =
+    trimmedQuery !== '' && suggestions.some(item => normalize(item.name) === normalize(trimmedQuery));
 
   useEffect(() => {
     if (!query.trim()) {
@@ -32,7 +40,11 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
         const data = await res.json();
         if (data.universities) {
           setSuggestions(data.universities);
-          setIsOpen(true);
+          if (skipNextOpenRef.current) {
+            skipNextOpenRef.current = false;
+          } else {
+            setIsOpen(true);
+          }
         }
       } catch (e) {
         console.error('Failed to fetch university suggestions', e);
@@ -55,6 +67,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
   const handleSelectMaster = (item: UniversityMasterItem) => {
     setSelectedItem(item);
     setIsCustomMode(false);
+    if (item.name !== query) skipNextOpenRef.current = true;
     setQuery(item.name);
     onChange(item.name, true, null);
     setIsOpen(false);
@@ -93,7 +106,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
             type="text"
             value={query}
             onChange={handleInputChange}
-            onFocus={() => query.trim() && setIsOpen(true)}
+            onFocus={() => trimmedQuery && !selectedItem && setIsOpen(true)}
             placeholder="大学名を入力 (例: 早稲田大学, 東京大学)"
             className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-10 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 transition-all"
           />
@@ -101,7 +114,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
         </div>
 
         {/* Autocomplete Dropdown List (完全ソリッド遮蔽背景) */}
-        {isOpen && (
+        {isOpen && (suggestions.length > 0 || !hasExactMatch) && (
           <div className="absolute left-0 right-0 top-full mt-2 bg-slate-950 border border-slate-700 rounded-2xl shadow-2xl z-[100] max-h-64 overflow-y-auto divide-y divide-slate-800/60">
             {suggestions.map(item => (
               <button
@@ -133,6 +146,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
               </button>
             ))}
 
+            {!hasExactMatch && (
             <button
               type="button"
               onClick={handleSelectFreeText}
@@ -141,6 +155,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
               <span>一覧に該当がない場合「{query}」を直接入力</span>
               <span className="text-[10px] font-semibold underline text-indigo-400">決定</span>
             </button>
+            )}
           </div>
         )}
       </div>
@@ -158,37 +173,8 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
         </div>
       )}
 
-      {/* 2. 手動偏差値設定 (下) */}
-      {selectedItem ? (
-        <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-            <span className="flex items-center gap-1.5">
-              <Sliders className="w-3.5 h-3.5 text-indigo-400" />
-              偏差値を微調整・上書き指定 (任意):
-            </span>
-            <span className="text-indigo-400 font-mono">
-              適用値: {(customHensachi !== '' && !isNaN(Number(customHensachi))) ? Number(customHensachi).toFixed(1) : selectedItem.hensachi.toFixed(1)}
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="number"
-              inputMode="decimal"
-              pattern="[0-9.]*"
-              step="0.5"
-              min="30"
-              max="80"
-              value={customHensachi}
-              onChange={handleCustomHensachiChange}
-              placeholder={`例: ${selectedItem.hensachi.toFixed(1)}`}
-              className="w-32 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-base sm:text-xs text-white focus:outline-none focus:border-indigo-500 font-mono"
-            />
-            <span className="text-[11px] text-slate-400">
-              ※プルダウン一覧にない大学の場合、偏差値を直接入力できます
-            </span>
-          </div>
-        </div>
-      ) : (
+      {/* 2. 手動偏差値設定 (下)：一覧に該当がない大学のときだけ表示 */}
+      {!selectedItem && trimmedQuery && !hasExactMatch && (isCustomMode || suggestions.length === 0) ? (
         <div className="p-3.5 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-xs font-bold text-slate-300">
             <span className="flex items-center gap-1.5">
@@ -214,7 +200,7 @@ export default function UniversityAutocomplete({ value, customHensachi: initialH
             </span>
           </div>
         </div>
-      )}
+      ) : null}
     </div>
   );
 }
