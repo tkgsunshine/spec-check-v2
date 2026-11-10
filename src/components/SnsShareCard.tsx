@@ -237,7 +237,15 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
       const scoreY = displayEpithetTitle ? currentY + 30 : 160;
       ctx.fillStyle = '#ffffff';
       ctx.font = '900 64px sans-serif';
-      ctx.fillText(deviation.toFixed(1), width / 2, scoreY);
+      const deviationText = deviation.toFixed(1);
+      ctx.fillText(deviationText, width / 2, scoreY);
+      // 数字の右下に小さく単位「pt」を添える（数字自体は中央のまま）
+      const deviationTextWidth = ctx.measureText(deviationText).width;
+      ctx.save();
+      ctx.textAlign = 'left';
+      ctx.font = '800 20px sans-serif';
+      ctx.fillText('pt', width / 2 + deviationTextWidth / 2 + 4, scoreY);
+      ctx.restore();
 
       ctx.fillStyle = isLoveMode ? '#f472b6' : '#94a3b8';
       ctx.font = 'bold 15px sans-serif';
@@ -494,6 +502,7 @@ ${rankShareStr} ${deviationLabel} ${deviation.toFixed(1)}
                 }`}
               >
                 {deviation.toFixed(1)}
+                <span className="ml-0.5 text-sm font-extrabold">pt</span>
               </div>
               <div
                 className={`text-[10px] font-semibold mb-2 ${

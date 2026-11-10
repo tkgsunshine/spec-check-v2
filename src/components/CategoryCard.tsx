@@ -88,6 +88,7 @@ export default function CategoryCard({ labelJa, labelEn, score, topPercent, colo
         <span className="text-[9px] font-extrabold text-slate-400 tracking-wider">偏差値</span>
         <span className={`text-2xl leading-none tracking-tight tabular-nums ${scoreTextColor}`}>
           {animatedDeviation(deviation, progress).toFixed(1)}
+          <span className="ml-0.5 text-[10px] tracking-normal">pt</span>
         </span>
         <div className="w-full max-w-[112px] mt-2">
           <DeviationCurve deviation={animatedDeviation(deviation, progress)} color={strokeColor} size="sm" />

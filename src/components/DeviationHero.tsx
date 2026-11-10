@@ -44,6 +44,7 @@ export default function DeviationHero({
         aria-label={`${label} ${deviation.toFixed(1)}`}
       >
         {shownDeviation.toFixed(1)}
+        <span className="ml-1 text-2xl sm:text-3xl tracking-normal">pt</span>
       </div>
 
       <p className="mt-3 text-[13px] sm:text-sm font-bold text-slate-200 leading-relaxed">
