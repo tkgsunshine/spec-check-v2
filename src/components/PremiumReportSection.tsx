@@ -571,7 +571,7 @@ ${nickname}と申します。${prefectureName}在住の${age}歳です。
       </div>
 
       {/* レポートコンテンツエリア */}
-      <div className="p-4 sm:p-6 md:p-8 space-y-8">
+      <div className="px-2 py-4 sm:p-6 md:p-8 space-y-8">
         {/* 1. 内包された詳細コンポーネント（カテゴリ別カード、総評、強みTOP5・伸びしろ） */}
         {typeof children === 'function' ? children({ isUnlocked }) : children}
 
